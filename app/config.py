@@ -45,4 +45,40 @@ DEFAULT_SETTINGS = {
     "rate_limit_chat_per_hour": "20",
     "grad_required_credits": "140",
     "search_max_chunks": "6",
+    # ورود یکپارچه (SSO) - هر ارائه‌دهنده سازگار با OIDC (مثل Keycloak)
+    "sso_oidc_issuer": "",           # نمونه: https://sso.university.ac.ir/realms/student360
+    "sso_oidc_client_id": "",
+    "sso_oidc_client_secret": "",
+    "sso_oidc_scope": "openid profile",
 }
+
+
+def secret_key() -> str:
+    """کلید امضای توکن: از متغیر محیطی، وگرنه کلید تصادفی پایدار در پوشه داده"""
+    env = os.environ.get("D360_SECRET_KEY")
+    if env:
+        return env
+    p = data_dir() / "secret.key"
+    if p.exists():
+        return p.read_text(encoding="ascii").strip()
+    import secrets as _secrets
+    key = _secrets.token_hex(32)
+    p.write_text(key, encoding="ascii")
+    try:
+        p.chmod(0o600)
+    except OSError:
+        pass
+    return key
+
+
+def web_port() -> int:
+    return int(os.environ.get("D360_PORT", "8600"))
+
+
+def frontend_dist_candidates():
+    """محل‌های احتمالی بیلد فرانت‌اند (مخزن و بسته پرتابل)"""
+    here = Path(__file__).resolve()
+    return [
+        here.parents[1] / "frontend" / "dist",   # مخزن: <root>/frontend/dist
+        here.parent / "web_static",              # نسخه پرتابل: app/web_static
+    ]

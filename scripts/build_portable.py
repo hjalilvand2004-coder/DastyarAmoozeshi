@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""ساخت نسخه پرتابل ویندوز (بدون نیاز به نصب پایتون)
+"""ساخت نسخه پرتابل ویندوز وب‌اپ (بدون نیاز به نصب پایتون/Node/PyQt)
 
 - پایتون امبدد رسمی ۳.۱۲ برای ویندوز ۶۴بیتی
-- نصب وابستگی‌ها از ویل‌های win_amd64
-- کد برنامه به‌صورت بسته app داخل site-packages
+- نصب وابستگی‌های وب (FastAPI/Uvicorn) از ویل‌های win_amd64
+- بیلد React از قبل ساخته‌شده (frontend/dist) داخل بسته قرار می‌گیرد
+- اجرا: RUN-DastyarAmoozeshi.bat → سرور محلی + باز شدن مرورگر
 - خروجی: dist/DastyarAmoozeshi-Portable-Windows-v<VER>.zip + dist/sha256.txt
 """
 
@@ -25,7 +26,7 @@ from app import __version__ as VERSION  # noqa: E402
 PY_VER = "3.12.8"
 PY_VER_NODOTS = "312"
 PY_URL = f"https://www.python.org/ftp/python/{PY_VER}/python-{PY_VER}-embed-amd64.zip"
-PACKAGES = ["PyQt6", "pypdf", "python-docx"]
+PACKAGES = ["fastapi", "uvicorn", "python-multipart", "pypdf", "python-docx"]
 
 PTH_CONTENT = """python312.zip
 Lib/site-packages
@@ -33,11 +34,18 @@ import site
 """
 
 RUN_BAT = """@echo off
-rem DastyarAmoozeshi - Portable launcher (no Python installation required)
+rem DastyarAmoozeshi - Portable web launcher (no Python installation required)
+title DastyarAmoozeshi - Student360 Assistant
 cd /d "%~dp0"
-set "DASTYAR_DATA_DIR=%~dp0data"
-set "QT_ENABLE_HIGHDPI_SCALING=1"
-runtime\\python\\python.exe -m app.main
+set "DASTYAR_HOME=%~dp0data"
+set "D360_PORT=8600"
+echo.
+echo   DastyarAmoozeshi (Student360) - web version
+echo   URL: http://127.0.0.1:8600/
+echo   API docs: http://127.0.0.1:8600/api/docs
+echo   Close this window to stop the server.
+echo.
+runtime\\python\\python.exe -m app.webapp --open
 if errorlevel 1 (
   echo.
   echo An error occurred. See the message above.
@@ -45,37 +53,47 @@ if errorlevel 1 (
 )
 """
 
-README_TXT = """دستیار آموزشی و آیین‌نامه‌ای دانشجو۳۶۰ - نسخه پرتابل ویندوز
+README_TXT = f"""دستیار آموزشی و آیین‌نامه‌ای دانشجو۳۶۰ - نسخه پرتابل ویندوز (وب)
 ================================================================
 
 اجرا:
   1) فایل ZIP را در یک پوشه باز کنید (Extract).
   2) RUN-DastyarAmoozeshi.bat را اجرا کنید (دابل‌کلیک).
+  3) مرورگر به‌صورت خودکار روی http://127.0.0.1:8600 باز می‌شود.
 
-نیازی به نصب پایتون یا PyQt نیست. ویندوز 10/11 64بیتی کافی است.
-دسترسی Administrator لازم نیست.
+نیازی به نصب پایتون، Node یا PyQt نیست. ویندوز 10/11 64بیتی کافی است.
+دسترسی Administrator لازم نیست. برای خروج، پنجره سیاه (سرور) را ببندید.
 
-نکته‌ها:
-- داده‌ها در پوشه data کنار همین فایل‌ها ذخیره می‌شود؛
-  برای انتقال کامل برنامه، کل پوشه را کپی کنید و برای حذف کامل، کل پوشه را پاک کنید.
-- در اولین اجرا دیتابیس با داده «نمونه و غیررسمی» ساخته می‌شود؛
-  اسناد رسمی دانشگاه را از صفحه «مدیریت اسناد» با چرخه تأیید/انتشار ثبت کنید.
-- حساب‌های نمایشی: admin / expert / content / approver / student
+- مستندات تعاملی API (برای سایر نرم‌افزارها): http://127.0.0.1:8600/api/docs
+- داده‌ها در پوشه data کنار همین فایل‌ها ذخیره می‌شود؛ برای انتقال کامل برنامه،
+  کل پوشه را کپی کنید و برای حذف کامل، کل پوشه را پاک کنید.
+- در اولین اجرا دیتابیس با داده «نمونه و غیررسمی» ساخته می‌شود.
+- حساب‌های نمایشی (ورود با رمز): admin / expert / content / approver / student
   رمز هر حساب به‌صورت Name@123 است (مثلاً Student@123).
-- برای استفاده از مدل زبانی اختیاری: تنظیمات ← «مدل زبانی».
+- ورود بدون رمز: در صفحه ورود، «ورود آزمایشی بدون رمز (نمونه)» را انتخاب کنید.
+- ورود یکپارچه دانشگاهی (SSO/Keycloak): مدیر سیستم در بخش «مدیریت سیستم ← تنظیمات»
+  آدرس IdP و کلاینت را ثبت کند؛ سپس دکمه SSO در صفحه ورود فعال می‌شود.
+- مدل زبانی اختیاری: مدیریت سیستم ← تنظیمات ← llm_base_url / llm_api_key / llm_model
+  بدون پیکربندی، موتور قالبی آفلاین پاسخ می‌دهد.
 
-هشدار مهم: تا زمانی که اسناد رسمی دانشگاه ثبت نشود، هیچ محتوایی
+هشدار مهم: تا زمانی که اسناد رسمی دانشگاه ثبت و منتشر نشود، هیچ محتوایی
 به‌عنوان قانون واقعی دانشگاه ارائه نمی‌شود؛ همه داده‌ها نمونه و غیررسمی‌اند.
+نسخه {VERSION}
 """
 
 
 def download(url: str, dest: Path) -> None:
     print(f"دانلود: {url}")
-    with urllib.request.urlopen(url, timeout=120) as r, open(dest, "wb") as f:
+    with urllib.request.urlopen(url, timeout=180) as r, open(dest, "wb") as f:
         shutil.copyfileobj(r, f, length=1 << 20)
 
 
 def main() -> int:
+    frontend_dist = ROOT / "frontend" / "dist"
+    if not (frontend_dist / "index.html").exists():
+        print("خطا: بیلد فرانت‌اند یافت نشد. ابتدا:  cd frontend && npm install && npm run build")
+        return 1
+
     dist = ROOT / "dist"
     bundle = dist / "portable"
     if bundle.exists():
@@ -93,7 +111,7 @@ def main() -> int:
     # ۲) فعال‌سازی site-packages
     (pydir / f"python{PY_VER_NODOTS}._pth").write_text(PTH_CONTENT, encoding="ascii")
 
-    # ۳) وابستگی‌ها برای win_amd64
+    # ۳) وابستگی‌های وب برای win_amd64
     sp = pydir / "Lib" / "site-packages"
     cmd = [sys.executable, "-m", "pip", "install", "--target", str(sp),
            "--platform", "win_amd64", "--implementation", "cp",
@@ -102,8 +120,10 @@ def main() -> int:
     print("نصب ویل‌ها:", " ".join(cmd))
     subprocess.run(cmd, check=True)
 
-    # ۴) کد برنامه
-    shutil.copytree(ROOT / "app", sp / "app")
+    # ۴) کد برنامه + بیلد فرانت‌اند
+    shutil.copytree(ROOT / "app", sp / "app",
+                    ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "resources"))
+    shutil.copytree(frontend_dist, sp / "app" / "web_static")
 
     # ۵) راه‌انداز و راهنما
     (bundle / "RUN-DastyarAmoozeshi.bat").write_bytes(RUN_BAT.replace("\n", "\r\n").encode("ascii"))

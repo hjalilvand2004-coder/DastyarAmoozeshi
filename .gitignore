@@ -13,11 +13,15 @@ data/
 *.db-shm
 
 # ساخت
-dist/
+/dist/
 build/
 wheels/
 runtime/
 *.zip
+
+# فرانت‌اند
+node_modules/
+frontend/node_modules/
 
 # سیستم‌عامل/ویرایشگر
 .DS_Store

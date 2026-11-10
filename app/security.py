@@ -9,13 +9,49 @@
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
+import json as _json
 import re
 import secrets
 import time
 import unicodedata
 from collections import defaultdict, deque
+
+# ---------- توکن JWT (HS256 - بدون وابستگی خارجی) ----------
+
+def make_token(payload: dict, expires_minutes: int = 720) -> str:
+    """ساخت توکن امضاشده HS256 برای احراز هویت API"""
+    from .config import secret_key
+    header = {"alg": "HS256", "typ": "JWT"}
+    now = int(time.time())
+    body = {**payload, "iat": now, "exp": now + expires_minutes * 60}
+
+    def b64(d: bytes) -> str:
+        return base64.urlsafe_b64encode(d).rstrip(b"=").decode("ascii")
+
+    h = b64(_json.dumps(header, separators=(",", ":")).encode("utf-8"))
+    p = b64(_json.dumps(body, separators=(",", ":")).encode("utf-8"))
+    sig = hmac.new(secret_key().encode("utf-8"), f"{h}.{p}".encode("ascii"), hashlib.sha256).digest()
+    return f"{h}.{p}.{b64(sig)}"
+
+
+def parse_token(token: str) -> dict | None:
+    """اعتبارسنجی توکن؛ نامعتبر/منقضی → None"""
+    from .config import secret_key
+    try:
+        h, p, s = token.split(".")
+        expected = hmac.new(secret_key().encode("utf-8"), f"{h}.{p}".encode("ascii"), hashlib.sha256).digest()
+        got = base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
+        if not hmac.compare_digest(expected, got):
+            return None
+        body = _json.loads(base64.urlsafe_b64decode(p + "=" * (-len(p) % 4)))
+        if int(body.get("exp", 0)) < time.time():
+            return None
+        return body
+    except Exception:
+        return None
 
 # الگوهای مشکوک به تزریق دستور (انگلیسی + فارسی)
 INJECTION_PATTERNS = [
