@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# داده محلی (هر سیستم خودش با seed می‌سازد)
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# ساخت
+dist/
+build/
+wheels/
+runtime/
+*.zip
+
+# سیستم‌عامل/ویرایشگر
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
