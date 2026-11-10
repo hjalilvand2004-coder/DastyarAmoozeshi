@@ -24,7 +24,7 @@ from app import __version__ as VERSION  # noqa: E402
 
 PY_VER = "3.12.8"
 PY_VER_NODOTS = "312"
-PY_URL = f"https://www.python.org/ftp/python/{PY_VER}/python-{PY_VER_NODOTS}-embed-amd64.zip"
+PY_URL = f"https://www.python.org/ftp/python/{PY_VER}/python-{PY_VER}-embed-amd64.zip"
 PACKAGES = ["PyQt6", "pypdf", "python-docx"]
 
 PTH_CONTENT = """python312.zip

@@ -21,3 +21,20 @@ def run_app(conn) -> int:
     win = MainWindow(conn, login.user)
     win.show()
     return app.exec()
+
+
+def _module_main() -> None:
+    """نقطه اجرا برای `python -m app.main` (نسخه پرتابل)"""
+    import sys
+    from . import db, seed
+    from .config import APP_NAME, VERSION, db_path
+
+    print(f"{APP_NAME} - نسخه {VERSION}")
+    conn = db.connect(db_path())
+    if seed.seed_if_empty(conn):
+        print("[DastyarAmoozeshi] داده نمونه (غیررسمی) ایجاد شد.")
+    sys.exit(run_app(conn))
+
+
+if __name__ == "__main__":
+    _module_main()
