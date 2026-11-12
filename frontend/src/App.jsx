@@ -13,6 +13,7 @@ import Processes from './pages/Processes'
 import Deadlines from './pages/Deadlines'
 import Tickets from './pages/Tickets'
 import Admin from './pages/Admin'
+import Integrations from './pages/Integrations'
 
 function RequireAuth({ children }) {
   const { user, loading } = useAuth()
@@ -37,6 +38,7 @@ export default function App() {
         <Route path="deadlines" element={<Deadlines />} />
         <Route path="tickets" element={<Tickets />} />
         <Route path="admin" element={<Admin />} />
+        <Route path="integrations" element={<Integrations />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

@@ -6,7 +6,7 @@ from pathlib import Path
 
 APP_NAME = "دستیار آموزشی و آیین‌نامه‌ای دانشجو۳۶۰"
 APP_NAME_SHORT = "دستیار آموزشی"
-VERSION = "0.1.0"
+VERSION = "0.3.0"
 ORG = "Student360"
 
 

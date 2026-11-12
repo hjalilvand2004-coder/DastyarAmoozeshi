@@ -17,10 +17,39 @@ from .security import hash_password, sanitize_document_text
 
 
 def seed_if_empty(conn) -> bool:
-    if db.q1(conn, "SELECT id FROM universities LIMIT 1"):
-        return False
-    _seed(conn)
-    return True
+    created = False
+    if not db.q1(conn, "SELECT id FROM universities LIMIT 1"):
+        _seed(conn)
+        created = True
+    _ensure_demo_integrations(conn)
+    return created
+
+
+def _ensure_demo_integrations(conn) -> None:
+    """سامانه‌های متصل نمونه (پژوهشیار/برنامه‌ریز/ویجت پرتال) - توان‌پذیر (idempotent)
+
+    برای دیتابیس‌های موجود هم اجرا می‌شود تا ارتقای نسخه بدون داده گم‌شده انجام شود.
+    """
+    from . import integration
+    demo = [
+        ("سامانه پژوهشیار (نمونه)", "pajooheshyar",
+         ["ask", "regulations.read", "rules.evaluate", "processes.read"], 120, False),
+        ("سامانه برنامه‌ریز (نمونه)", "barnamehriz",
+         ["ask", "deadlines.read", "processes.read", "tickets.create"], 120, False),
+        ("ویجت پرتال دانشجو (نمونه)", "portal-widget", ["ask"], 60, True),
+    ]
+    uni = db.q1(conn, "SELECT id FROM universities ORDER BY id LIMIT 1")
+    if not uni:
+        return
+    for name, code, scopes, rate, is_widget in demo:
+        if db.q1(conn, "SELECT id FROM external_systems WHERE university_id=? AND code=?", (uni["id"], code)):
+            continue
+        key = integration.generate_key()
+        db.ex(conn, "INSERT INTO external_systems(university_id, name, code, api_key, api_key_hash, "
+                    "scopes, rate_limit_per_hour, is_widget, contact) VALUES(?,?,?,?,?,?,?,?,?)",
+              (uni["id"], name, code, key, integration.hash_key(key),
+               json.dumps(scopes, ensure_ascii=False), rate, 1 if is_widget else 0,
+               "سامانه نمونه - غیررسمی"))
 
 
 def _seed(conn) -> None:
@@ -246,3 +275,4 @@ def _seed(conn) -> None:
     db.set_setting(conn, "sample_data_mode", "1")
     db.set_setting(conn, "grad_required_credits", "140")
     db.audit(conn, {"id": admin, "university_id": uni_id}, "seed", "داده نمونه ایجاد شد")
+    _ensure_demo_integrations(conn)

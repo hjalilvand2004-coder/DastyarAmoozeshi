@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Fingerprint, GraduationCap, Loader2, Lock, LogIn, User } from 'lucide-react'
-import api, { errMsg } from '../api'
+import api, { errMsg, withGateway } from '../api'
 import { useAuth } from '../auth'
 import { faNum } from '../jalali'
 
@@ -37,10 +37,10 @@ export default function Login() {
       if (p.kind === 'demo') {
         const { data } = await api.get(`/auth/sso/${p.id}/start`, { params: { as_: demoIdentity } })
         // جریان واقعی SSO: هدایت به صفحه بازگشت و تبادل تیکت یک‌بار مصرف
-        window.location.href = data.redirect
+        window.location.href = withGateway(data.redirect)
       } else if (p.kind === 'oidc') {
         const { data } = await api.get(`/auth/sso/${p.id}/start`)
-        window.location.href = data.redirect
+        window.location.href = withGateway(data.redirect)
       }
     } catch (e2) { setErr(errMsg(e2)); setSsoBusy('') }
   }

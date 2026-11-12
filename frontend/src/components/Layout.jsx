@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   BookOpenText, CalendarClock, ClipboardList, FlaskConical, GraduationCap,
-  LayoutDashboard, LifeBuoy, LogOut, Map, MessageSquareText, Settings2, ShieldAlert,
+  LayoutDashboard, LifeBuoy, LogOut, Map, MessageSquareText, Settings2, ShieldAlert, Blocks,
 } from 'lucide-react'
 import { useAuth } from '../auth'
 import { Chip } from '../ui'
@@ -17,6 +17,7 @@ const NAV = [
   { to: '/deadlines', label: 'تقویم و مهلت‌ها', icon: CalendarClock, perm: 'deadlines.read' },
   { to: '/tickets', label: 'درخواست از کارشناس', icon: LifeBuoy, perm: 'tickets.own' },
   { to: '/admin', label: 'مدیریت سیستم', icon: Settings2, perm: 'users.manage' },
+  { to: '/integrations', label: 'سامانه‌های متصل', icon: Blocks, perm: 'users.manage' },
 ]
 
 export default function Layout() {

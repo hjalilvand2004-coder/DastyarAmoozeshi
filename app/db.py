@@ -185,6 +185,38 @@ CREATE TABLE IF NOT EXISTS settings(
   value TEXT
 );
 
+CREATE TABLE IF NOT EXISTS external_systems(
+  id INTEGER PRIMARY KEY,
+  university_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  code TEXT NOT NULL,
+  api_key TEXT NOT NULL,
+  api_key_hash TEXT NOT NULL,
+  scopes TEXT DEFAULT '[]',
+  rate_limit_per_hour INTEGER DEFAULT 120,
+  active INTEGER DEFAULT 1,
+  is_widget INTEGER DEFAULT 0,
+  contact TEXT DEFAULT '',
+  created_by INTEGER,
+  created_at TEXT DEFAULT (datetime('now')),
+  last_used_at TEXT,
+  call_count INTEGER DEFAULT 0,
+  UNIQUE(university_id, code)
+);
+CREATE INDEX IF NOT EXISTS idx_extsys_hash ON external_systems(api_key_hash);
+
+CREATE TABLE IF NOT EXISTS integration_logs(
+  id INTEGER PRIMARY KEY,
+  university_id INTEGER,
+  system_id INTEGER NOT NULL,
+  endpoint TEXT NOT NULL,
+  status_code INTEGER,
+  duration_ms INTEGER,
+  ip TEXT DEFAULT '',
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_intlog_sys ON integration_logs(system_id);
+
 CREATE TABLE IF NOT EXISTS audit_log(
   id INTEGER PRIMARY KEY,
   university_id INTEGER,
