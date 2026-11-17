@@ -88,6 +88,9 @@ class AskIn(BaseModel):
                               description="موضوع موردنیاز سامانه میزبان (مثل «کارورزی») برای تمرکز جست‌وجو")
     student: StudentCtx | None = None
     include_retired: bool = False
+    doc_category: str | None = Field(
+        default=None, max_length=30,
+        description="محدودسازی نوع سند: ayinnameh / dastoorolamal / bakhshnameh / other")
 
 
 class SearchIn(BaseModel):
@@ -119,14 +122,20 @@ def ask(body: AskIn, system: dict = Depends(get_system), conn=Depends(get_conn))
         q_text = f"{q_text} ({body.topic.strip()})"
     user = integration.virtual_user(system["university_id"])
     student = _student(conn, system, body.student)
-    ans = integration_answer(conn, user, student, q_text, body.include_retired)
+    ans = integration_answer(conn, user, student, q_text, body.include_retired,
+                             doc_category=body.doc_category or None)
     return {"answer": dataclasses.asdict(ans), "meta": _meta(system)}
 
 
-def integration_answer(conn, user, student, question: str, include_retired: bool):
+def integration_answer(conn, user, student, question: str, include_retired: bool,
+                       doc_category: str | None = None):
     """همان موتور پاسخ سه‌لایه سامانه (بدون ذخیره تاریخچه گفت‌وگو - بی‌حالت)"""
-    from app.answers import build_answer
-    return build_answer(conn, user, student, question, include_retired=include_retired)
+    from app.answers import DOC_CATEGORIES, build_answer
+    if doc_category and doc_category not in DOC_CATEGORIES:
+        raise ValueError("doc_category نامعتبر است؛ مقادیر مجاز: ayinnameh / dastoorolamal / "
+                         "bakhshnameh / other")
+    return build_answer(conn, user, student, question, include_retired=include_retired,
+                        doc_category=doc_category)
 
 
 # ---------- ۲) جست‌وجوی آیین‌نامه ----------

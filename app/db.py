@@ -49,6 +49,7 @@ CREATE TABLE IF NOT EXISTS documents(
   university_id INTEGER NOT NULL,
   title TEXT NOT NULL,
   doc_type TEXT DEFAULT 'text',
+  doc_category TEXT DEFAULT '',
   status TEXT DEFAULT 'draft',
   version_no INTEGER DEFAULT 1,
   parent_id INTEGER,
@@ -237,8 +238,16 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys=ON")
     conn.executescript(SCHEMA)
+    _migrate(conn)
     conn.commit()
     return conn
+
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    """ارتقای پایگاه‌داده نسخه‌های قبل (فقط تغییرات افزوده‌شونده؛ داده دست نمی‌خورد)"""
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(documents)")}
+    if "doc_category" not in cols:
+        conn.execute("ALTER TABLE documents ADD COLUMN doc_category TEXT DEFAULT ''")
 
 
 def q(conn: sqlite3.Connection, sql: str, params: tuple = ()) -> list[dict]:

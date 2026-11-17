@@ -34,15 +34,15 @@ import site
 """
 
 RUN_BAT = """@echo off
-rem DastyarAmoozeshi - Portable web launcher (no Python installation required)
-title DastyarAmoozeshi - Student360 Assistant
+rem AmoozeshYar360 - Portable web launcher (no Python installation required)
+title AmoozeshYar360 - Student360 Assistant
 cd /d "%~dp0"
 set "DASTYAR_HOME=%~dp0data"
-set "D360_PORT=8600"
+set "D360_PORT=8091"
 echo.
-echo   DastyarAmoozeshi (Student360) - web version
-echo   URL: http://127.0.0.1:8600/
-echo   API docs: http://127.0.0.1:8600/api/docs
+echo   AmoozeshYar360 (Student360) - web version
+echo   URL: http://127.0.0.1:8091/
+echo   API docs: http://127.0.0.1:8091/api/docs
 echo   Close this window to stop the server.
 echo.
 runtime\\python\\python.exe -m app.webapp --open
@@ -53,26 +53,28 @@ if errorlevel 1 (
 )
 """
 
-README_TXT = f"""دستیار آموزشی و آیین‌نامه‌ای دانشجو۳۶۰ - نسخه پرتابل ویندوز (وب)
+README_TXT = f"""آموزش‌یار۳۶۰ - نسخه پرتابل ویندوز (وب)
 ================================================================
 
 اجرا:
   1) فایل ZIP را در یک پوشه باز کنید (Extract).
   2) RUN-DastyarAmoozeshi.bat را اجرا کنید (دابل‌کلیک).
-  3) مرورگر به‌صورت خودکار روی http://127.0.0.1:8600 باز می‌شود.
+  3) مرورگر به‌صورت خودکار روی http://127.0.0.1:8091 باز می‌شود.
 
 نیازی به نصب پایتون، Node یا PyQt نیست. ویندوز 10/11 64بیتی کافی است.
 دسترسی Administrator لازم نیست. برای خروج، پنجره سیاه (سرور) را ببندید.
 
-- مستندات تعاملی API (برای سایر نرم‌افزارها): http://127.0.0.1:8600/api/docs
+- مستندات تعاملی API (برای سایر نرم‌افزارها): http://127.0.0.1:8091/api/docs
 - داده‌ها در پوشه data کنار همین فایل‌ها ذخیره می‌شود؛ برای انتقال کامل برنامه،
   کل پوشه را کپی کنید و برای حذف کامل، کل پوشه را پاک کنید.
 - در اولین اجرا دیتابیس با داده «نمونه و غیررسمی» ساخته می‌شود.
 - حساب‌های نمایشی (ورود با رمز): admin / expert / content / approver / student
   رمز هر حساب به‌صورت Name@123 است (مثلاً Student@123).
 - ورود بدون رمز: در صفحه ورود، «ورود آزمایشی بدون رمز (نمونه)» را انتخاب کنید.
-- ورود یکپارچه دانشگاهی (SSO/Keycloak): مدیر سیستم در بخش «مدیریت سیستم ← تنظیمات»
-  آدرس IdP و کلاینت را ثبت کند؛ سپس دکمه SSO در صفحه ورود فعال می‌شود.
+- ورود یکپارچه سازمانی (پرتال SSO دانشجو۳۶۰): پیش‌فرض‌های نسخه ۰.۴ هم‌تراز با پرتال
+  سازمان است (issuer http://188.212.96.235:8086 و client amoozeshyar360)؛ «آدرس ورود»
+  برای ثبت در پرتال: http://188.212.96.235:8091/api/v1/auth/sso/university/entry
+  (در بسته پرتابلِ محلی آدرس عمومی همان 127.0.0.1:8091 است و باید در پرتال سرور واقعی مستقر شود).
 - مدل زبانی اختیاری: مدیریت سیستم ← تنظیمات ← llm_base_url / llm_api_key / llm_model
   بدون پیکربندی، موتور قالبی آفلاین پاسخ می‌دهد.
 

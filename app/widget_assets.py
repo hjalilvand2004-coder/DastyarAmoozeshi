@@ -6,21 +6,22 @@ widget.js با یک خط به هر سامانه‌ای (پژوهشیار، بر�
   <script src="http://HOST/api/v1/integration/widget.js"
           data-key="d360_..."
           data-url="http://HOST"
-          data-title="دستیار آیین‌نامه‌ای"></script>
+          data-title="آموزش‌یار۳۶۰"></script>
 
-پیکربندی اختیاری: data-position (left/right)، data-student (JSON پروفایل دانشجو)
-و یا متغیر جهانی window.DastyarStudent (پروفایل پویا از سامانه میزبان).
+پیکربندی اختیاری: data-position (left/right)، data-student (JSON پروفایل دانشجو)،
+data-category (ayinnameh / dastoorolamal / bakhshnameh / other)
+و یا متغیر جهانی window.AmoozeshYarStudent (پروفایل پویا از سامانه میزبان).
 """
 
 WIDGET_JS = r"""/*!
- * DastyarAmoozeshi Embeddable Assistant Widget v0.3.0
- * دستیار آموزشی و آیین‌نامه‌ای دانشجو۳۶۰ — چت‌بات قابل نصب در سایر سامانه‌ها
+ * AmoozeshYar360 Embeddable Assistant Widget v0.4.0
+ * آموزش‌یار۳۶۰ — چت‌بات قابل نصب در سایر سامانه‌ها
  * تمام پاسخ‌ها «مستند و مستند-نمونه» است؛ هیچ پاسخی بدون استناد ارائه نمی‌شود.
  */
 (function () {
   'use strict';
-  if (window.__Dastyar360WidgetLoaded) return;
-  window.__Dastyar360WidgetLoaded = true;
+  if (window.__AmoozeshYar360WidgetLoaded) return;
+  window.__AmoozeshYar360WidgetLoaded = true;
 
   var script = document.currentScript || (function () {
     var s = document.getElementsByTagName('script');
@@ -33,9 +34,10 @@ WIDGET_JS = r"""/*!
   }
 
   var KEY = attr('key', '');
-  var TITLE = attr('title', 'دستیار آیین‌نامه‌ای');
-  var SUBTITLE = attr('subtitle', 'دانشجو۳۶۰ · پاسخ مستند با استناد');
+  var TITLE = attr('title', 'آموزش‌یار۳۶۰');
+  var SUBTITLE = attr('subtitle', 'پرتال دانشجو۳۶۰ · پاسخ مستند با استناد');
   var POS = attr('position', 'left') === 'right' ? 'right' : 'left';
+  var CAT = attr('category', '');
 
   var BASE = attr('url', '');
   if (!BASE && script && script.src) { try { BASE = new URL(script.src).origin; } catch (e) {} }
@@ -50,7 +52,7 @@ WIDGET_JS = r"""/*!
   }
 
   function hostStudent() {
-    if (window.DastyarStudent) return window.DastyarStudent;
+    if (window.AmoozeshYarStudent) return window.AmoozeshYarStudent;
     try { return JSON.parse(attr('student', '{}') || '{}'); } catch (e) { return {}; }
   }
 
@@ -177,7 +179,7 @@ WIDGET_JS = r"""/*!
 
   var launcher = document.createElement('button');
   launcher.className = 'd360-launcher';
-  launcher.title = 'دستیار آموزشی و آیین‌نامه‌ای';
+  launcher.title = 'آموزش‌یار۳۶۰ — دستیار آموزش و آیین‌نامه';
   launcher.innerHTML = '<span class="d360-pulse"></span>' + ICON_BOT;
   root.appendChild(launcher);
 
@@ -269,11 +271,12 @@ WIDGET_JS = r"""/*!
     inp.value = '';
     setBusy(true);
     var t = addHTML('<span class="d360-typing"><span class="d360-dot"></span><span class="d360-dot"></span><span class="d360-dot"></span></span>', 'd360-msg d360-bot');
-    var payload = JSON.stringify({ question: q, student: hostStudent(), source_page: String(location.href).slice(0, 300) });
+    var payload = { question: q, student: hostStudent(), source_page: String(location.href).slice(0, 300) };
+    if (CAT) payload.doc_category = CAT;
     fetch(api('/api/v1/integration/v1/ask'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-Key': KEY },
-      body: payload,
+      body: JSON.stringify(payload),
     }).then(function (r) {
       return r.json().then(function (j) { return { ok: r.ok, j: j }; });
     }).then(function (res) {
@@ -307,7 +310,7 @@ DEMO_HTML = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>صفحه آزمایشی سامانه پژوهشیار — نصب ویجت دستیار</title>
+<title>صفحه آزمایشی سامانه پژوهشیار — نصب ویجت آموزش‌یار۳۶۰</title>
 <style>
   * { box-sizing: border-box; font-family: 'Vazirmatn', 'Segoe UI', Tahoma, sans-serif; }
   body { margin: 0; background: #05070f; color: #e2e8f0; min-height: 100vh;
@@ -337,7 +340,7 @@ DEMO_HTML = r"""<!DOCTYPE html>
   <div class="logo">پ</div>
   <div>
     <h1>سامانه پژوهشیار (صفحه آزمایشی)</h1>
-    <p>نمونه‌ای از یک سامانه دیگر که چت‌بات دستیار آیین‌نامه‌ای در آن نصب شده است — غیررسمی</p>
+    <p>نمونه‌ای از یک سامانه دیگر که چت‌بات آموزش‌یار۳۶۰ در آن نصب شده است — غیررسمی</p>
   </div>
   <span class="badge">نمونه و غیررسمی</span>
 </header>
@@ -355,6 +358,6 @@ DEMO_HTML = r"""<!DOCTYPE html>
     و همراه با استناد به اسناد (نمونه و غیررسمی) دریافت می‌شود.
   </div>
 </main>
-<script src="/api/v1/integration/widget.js" data-key="__KEY__" data-title="دستیار آیین‌نامه‌ای در پژوهشیار" data-position="left"></script>
+<script src="/api/v1/integration/widget.js" data-key="__KEY__" data-title="آموزش‌یار۳۶۰ در پژوهشیار" data-position="left"></script>
 </body>
 </html>"""

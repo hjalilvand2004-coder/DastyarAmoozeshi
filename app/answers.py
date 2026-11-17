@@ -40,6 +40,14 @@ DOC_STATUS_FA = {
     "retired": "ملغی‌شده",
 }
 
+# نوع سند از دید دانشجو (آیین‌نامه / دستورالعمل / بخشنامه / سایر)
+DOC_CATEGORIES = {
+    "ayinnameh": "آیین‌نامه",
+    "dastoorolamal": "دستورالعمل",
+    "bakhshnameh": "بخشنامه",
+    "other": "سایر",
+}
+
 STRONG_SCORE = 1.2
 
 
@@ -199,12 +207,15 @@ def _student_profile(student: dict | None) -> dict:
     }
 
 
-def _candidate_docs(conn, user, student, include_retired=False):
+def _candidate_docs(conn, user, student, include_retired=False, doc_category=None):
     today = datetime.date.today()
     rows = db.q(conn, "SELECT * FROM documents WHERE university_id=? AND status IN ('published','retired')",
                 (user["university_id"],))
     current, retired = [], []
     for d in rows:
+        # فیلتر نوع سند (آیین‌نامه/دستورالعمل/بخشنامه/سایر) - درخواستی دانشجو یا سامانه میزبان
+        if doc_category and (d.get("doc_category") or "") != doc_category:
+            continue
         match, _unk, _u = scope_state(d, student)
         if not match:
             continue
@@ -244,6 +255,7 @@ def _make_citation(chunk: dict, doc: dict, idx: int) -> dict:
         "chunk_id": chunk["id"],
         "document_id": doc["id"],
         "doc_title": doc["title"],
+        "doc_category_fa": DOC_CATEGORIES.get(doc.get("doc_category") or "", "سایر"),
         "version_no": doc["version_no"],
         "status": doc["status"],
         "status_fa": DOC_STATUS_FA.get(doc["status"], doc["status"]),
@@ -312,7 +324,7 @@ def _warn_flags(flat_flags: list[str]) -> list[str]:
 
 
 def build_answer(conn, user, student, question: str, include_retired: bool = False,
-                 provider=None) -> Answer:
+                 provider=None, doc_category: str | None = None) -> Answer:
     """پرسش دانشجو را به پاسخ مستند سه‌لایه تبدیل می‌کند"""
     ans = Answer(question=question)
     settings = db.get_settings(conn)
@@ -322,12 +334,16 @@ def build_answer(conn, user, student, question: str, include_retired: bool = Fal
         ans.note = "پرسش خالی است."
         return ans
 
-    current, retired = _candidate_docs(conn, user, student, include_retired)
+    cat_fa = DOC_CATEGORIES.get(doc_category or "", "")
+    current, retired = _candidate_docs(conn, user, student, include_retired, doc_category)
     all_docs = current + retired
     if not all_docs:
         ans.no_result = True
-        ans.note = ("در حال حاضر هیچ سند منتشرشده‌ای که به شما اعمال شود در سامانه ثبت نشده است. "
-                    "لطفاً از طریق «درخواست از کارشناس» موضوع را پیگیری کنید.")
+        note = ("در حال حاضر هیچ سند منتشرشده‌ای که به شما اعمال شود در سامانه ثبت نشده است. "
+                "لطفاً از طریق «درخواست از کارشناس» موضوع را پیگیری کنید.")
+        if cat_fa:
+            note = f"هیچ سند منتشرشده‌ای از نوع «{cat_fa}» که به شما اعمال شود یافت نشد. " + note
+        ans.note = note
         return ans
 
     docs_by_id = {d["id"]: d for d in all_docs}
@@ -462,7 +478,7 @@ def build_answer(conn, user, student, question: str, include_retired: bool = Fal
 
 
 def ask(conn, user, question: str, session_id: int | None = None,
-        include_retired: bool = False, provider=None) -> Answer:
+        include_retired: bool = False, provider=None, doc_category: str | None = None) -> Answer:
     """نقطه ورود گفتگو: کنترل مجوز، محدودسازی نرخ، ذخیره تاریخچه"""
     from .services import require, get_student_for_user  # جلوگیری از چرخه واردات
     require(user, "chat")
@@ -475,7 +491,8 @@ def ask(conn, user, question: str, session_id: int | None = None,
         return ans
 
     student = get_student_for_user(conn, user)
-    ans = build_answer(conn, user, student, question, include_retired, provider)
+    ans = build_answer(conn, user, student, question, include_retired, provider,
+                       doc_category=doc_category)
 
     if session_id is None:
         session_id = db.ex(conn, "INSERT INTO chat_sessions(user_id, title) VALUES(?,?)",

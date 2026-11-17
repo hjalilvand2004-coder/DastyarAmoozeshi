@@ -35,6 +35,7 @@ class ImportIn(BaseModel):
     title: str
     text: str = ""
     doc_type: str = "text"
+    doc_category: str | None = None   # ayinnameh / dastoorolamal / bakhshnameh / other
     url: str | None = None
     effective_from: str | None = None
     effective_until: str | None = None
@@ -49,6 +50,7 @@ class ImportIn(BaseModel):
 def import_text(body: ImportIn, user: dict = Depends(get_current_user),
                 conn=Depends(get_conn)):
     doc_id = import_document(conn, user, title=body.title, doc_type=body.doc_type,
+                             doc_category=body.doc_category or None,
                              text=body.text, url=body.url,
                              effective_from=body.effective_from, effective_until=body.effective_until,
                              scope_level=body.scope_level, scope_major=body.scope_major,
@@ -60,6 +62,7 @@ def import_text(body: ImportIn, user: dict = Depends(get_current_user),
 @router.post("/import-file", summary="بارگذاری فایل (txt/md/pdf/docx) به‌عنوان پیش‌نویس")
 async def import_file(title: str = Form(...), file: UploadFile = File(...),
                       url: str | None = Form(None),
+                      doc_category: str | None = Form(None),
                       scope_level: str | None = Form(None),
                       scope_major: str | None = Form(None),
                       user: dict = Depends(get_current_user), conn=Depends(get_conn)):
@@ -74,6 +77,7 @@ async def import_file(title: str = Form(...), file: UploadFile = File(...),
         doc_type = {"": "text", ".txt": "text", ".md": "text",
                     ".pdf": "pdf", ".docx": "docx"}[suffix]
         doc_id = import_document(conn, user, title=title, doc_type=doc_type,
+                                 doc_category=doc_category or None,
                                  file_path=tmp.name, url=url,
                                  scope_level=scope_level, scope_major=scope_major,
                                  source_note=f"بارگذاری فایل: {file.filename}")

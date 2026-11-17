@@ -10,8 +10,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app import db
+from app.answers import DOC_CATEGORIES, ask
 from app.api.deps import get_conn, get_current_user
-from app.answers import ask
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -20,13 +20,18 @@ class AskIn(BaseModel):
     question: str
     session_id: int | None = None
     include_retired: bool = False
+    doc_category: str | None = None
 
 
-@router.post("/ask", summary="پرسش از دستیار مستند")
+@router.post("/ask", summary="پرسش از دستیار مستند (اختیاری: محدودسازی به نوع سند)")
 def ask_question(body: AskIn, user: dict = Depends(get_current_user),
                  conn=Depends(get_conn)):
+    if body.doc_category and body.doc_category not in DOC_CATEGORIES:
+        raise HTTPException(status_code=400,
+                            detail="نوع سند نامعتبر است؛ مقادیر مجاز: "
+                                   + "، ".join(sorted(DOC_CATEGORIES)))
     ans = ask(conn, user, body.question, session_id=body.session_id,
-              include_retired=body.include_retired)
+              include_retired=body.include_retired, doc_category=body.doc_category or None)
     return {"answer": dataclasses.asdict(ans)}
 
 

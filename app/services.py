@@ -13,6 +13,7 @@ import re
 from pathlib import Path
 
 from . import db
+from .answers import DOC_CATEGORIES
 from .db import audit, ex, q, q1
 from .jalali import format_jalali
 from .security import hash_password, sanitize_document_text, verify_password
@@ -234,21 +235,24 @@ def _split_chunks(text: str, pages: list[int] | None = None) -> list[dict]:
 def import_document(conn, actor, title, doc_type="text", text="", file_path=None, url=None,
                     effective_from=None, effective_until=None, scope_level=None, scope_major=None,
                     scope_entry_from=None, scope_entry_to=None, source_note="", is_official=False,
-                    status="draft") -> int:
+                    status="draft", doc_category=None) -> int:
     """ثبت سند در پایگاه دانش (نسخه جدید همیشه از این مسیر با وضعیت پیش‌نویس شروع می‌شود)"""
     require(actor, "regs.create")
     if not title or not title.strip():
         raise ValueError("عنوان سند الزامی است.")
+    if doc_category is not None and doc_category not in DOC_CATEGORIES:
+        raise ValueError("نوع سند نامعتبر است؛ مقادیر مجاز: " + "، ".join(sorted(DOC_CATEGORIES)))
     if file_path and not text:
         text, _pages = _extract_text(file_path, doc_type)
     if doc_type in ("text", "pdf_text", "pdf_scan", "word") and not (text or "").strip():
         raise ValueError("متن سند خالی است.")
     clean, flags = sanitize_document_text(text or "")
-    doc_id = ex(conn, "INSERT INTO documents(university_id, title, doc_type, status, effective_from, "
-                      "effective_until, scope_level, scope_major, scope_entry_from, scope_entry_to, "
-                      "file_path, url, source_note, is_official, flags, created_by) "
-                      "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (actor["university_id"], title.strip(), doc_type, status if status in ("draft",) else "draft",
+    doc_id = ex(conn, "INSERT INTO documents(university_id, title, doc_type, doc_category, status, "
+                      "effective_from, effective_until, scope_level, scope_major, scope_entry_from, "
+                      "scope_entry_to, file_path, url, source_note, is_official, flags, created_by) "
+                      "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (actor["university_id"], title.strip(), doc_type, doc_category or "",
+                 status if status in ("draft",) else "draft",
                  effective_from, effective_until, scope_level, scope_major, scope_entry_from,
                  scope_entry_to, str(file_path or ""), url, source_note, 1 if is_official else 0,
                  json.dumps(flags, ensure_ascii=False), actor["id"]))
@@ -273,11 +277,13 @@ def revise_document(conn, actor, doc_id: int) -> int:
     _uni_check(doc, actor)
     if doc["status"] not in ("published", "approved"):
         raise ValueError("نسخه جدید فقط از سند تأییدشده یا منتشرشده قابل ایجاد است.")
-    new_id = ex(conn, "INSERT INTO documents(university_id, title, doc_type, status, version_no, parent_id, "
-                      "effective_from, effective_until, scope_level, scope_major, scope_entry_from, "
-                      "scope_entry_to, file_path, url, source_note, is_official, flags, created_by) "
-                      "VALUES(?,?,?,'draft',?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                (doc["university_id"], doc["title"], doc["doc_type"], doc["version_no"] + 1, doc["id"],
+    new_id = ex(conn, "INSERT INTO documents(university_id, title, doc_type, doc_category, status, version_no, "
+                      "parent_id, effective_from, effective_until, scope_level, scope_major, "
+                      "scope_entry_from, scope_entry_to, file_path, url, source_note, is_official, "
+                      "flags, created_by) "
+                      "VALUES(?,?,?,?,'draft',?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                (doc["university_id"], doc["title"], doc["doc_type"], doc.get("doc_category") or "",
+                 doc["version_no"] + 1, doc["id"],
                  doc["effective_from"], doc["effective_until"], doc["scope_level"], doc["scope_major"],
                  doc["scope_entry_from"], doc["scope_entry_to"], doc["file_path"], doc["url"],
                  doc["source_note"], doc["is_official"], doc["flags"], actor["id"]))

@@ -15,6 +15,10 @@ export default function SsoCallback() {
     if (done.current) return
     done.current = true
 
+    // خطای بازگشت از نقطه ورود یکپارچه (پرتال SSO)
+    const ssoError = params.get('sso_error')
+    if (ssoError) { setErr(ssoError); return }
+
     const token = params.get('token')
     if (token) {
       // بازگشت مستقیم از IdP واقعی (توکن برنامه در URL است)

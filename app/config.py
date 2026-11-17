@@ -4,10 +4,17 @@
 import os
 from pathlib import Path
 
-APP_NAME = "دستیار آموزشی و آیین‌نامه‌ای دانشجو۳۶۰"
-APP_NAME_SHORT = "دستیار آموزشی"
-VERSION = "0.3.0"
+APP_NAME = "آموزش‌یار۳۶۰"
+APP_NAME_SHORT = "آموزش‌یار۳۶۰"
+VERSION = "0.4.0"
 ORG = "Student360"
+
+# پرتال ورود یکپارچه سازمانی (هاب SSO) و آدرس استقرار این سامانه
+# این مقادیر «پیش‌فرض» هستند و با متغیر محیطی یا تنظیمات مدیر قابل بازنویسی‌اند.
+DEFAULT_PUBLIC_BASE_URL = "http://188.212.96.235:8091"
+DEFAULT_SSO_ISSUER = "http://188.212.96.235:8086"
+DEFAULT_SSO_CLIENT_ID = "amoozeshyar360"
+DEFAULT_SSO_APP_KEY = "amoozeshyar"
 
 
 def base_dir() -> Path:
@@ -45,12 +52,24 @@ DEFAULT_SETTINGS = {
     "rate_limit_chat_per_hour": "20",
     "grad_required_credits": "140",
     "search_max_chunks": "6",
-    # ورود یکپارچه (SSO) - هر ارائه‌دهنده سازگار با OIDC (مثل Keycloak)
-    "sso_oidc_issuer": "",           # نمونه: https://sso.university.ac.ir/realms/student360
-    "sso_oidc_client_id": "",
-    "sso_oidc_client_secret": "",
+    # آدرس عمومی سامانه (مبنای ساخت redirect_uri و نقطه ورود SSO)
+    "public_base_url": DEFAULT_PUBLIC_BASE_URL,   # نمونه: http://188.212.96.235:8091
+    # ورود یکپارچه (SSO) - پرتال دانشجویار۳۶۰ یا هر IdP سازگار با OIDC (مثل Keycloak)
+    "sso_oidc_issuer": DEFAULT_SSO_ISSUER,           # پرتال SSO سازمان: http://188.212.96.235:8086
+    "sso_oidc_client_id": DEFAULT_SSO_CLIENT_ID,     # طبق ثبت سامانه در پرتال SSO
+    "sso_oidc_client_secret": "",                    # کلاینت عمومی: خالی + PKCE(S256)
     "sso_oidc_scope": "openid profile",
+    "sso_app_key": DEFAULT_SSO_APP_KEY,              # کلید سامانه در پرتال (مبنای نگاشت نقش‌ها)
+    "sso_hub_secret": "",                            # اختیاری: رمز مشترک HS256 برای توکن امضاشدهٔ پرتال
 }
+
+
+def public_base_url() -> str:
+    """آدرس عمومی سامانه برای ساخت redirect_uri و نقطه ورود SSO"""
+    env = os.environ.get("D360_PUBLIC_BASE_URL")
+    if env:
+        return env.rstrip("/")
+    return DEFAULT_PUBLIC_BASE_URL
 
 
 def secret_key() -> str:
@@ -72,7 +91,8 @@ def secret_key() -> str:
 
 
 def web_port() -> int:
-    return int(os.environ.get("D360_PORT", "8600"))
+    """پورت سرویس وب؛ پیش‌فرض طبق استقرار سازمانی: ۸۰۹۱"""
+    return int(os.environ.get("D360_PORT", "8091"))
 
 
 def frontend_dist_candidates():

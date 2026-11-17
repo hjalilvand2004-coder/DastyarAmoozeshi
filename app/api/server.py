@@ -39,10 +39,11 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title=APP_NAME,
         version=__version__,
-        description="زیرسیستم «دستیار آموزشی و آیین‌نامه‌ای دانشجو۳۶۰» - "
+        description="زیرسیستم «آموزش‌یار۳۶۰» از پرتال دانشجو۳۶۰ - "
                     "هر بخش به‌صورت سرویس API مستقل در دسترس سایر نرم‌افزارهاست؛ "
                     "سامانه‌های دیگر (پژوهشیار، برنامه‌ریز، ...) با X-API-Key از "
-                    "/api/v1/integration/v1 مصرف می‌کنند و چت‌بات با widget.js نصب می‌شود.",
+                    "/api/v1/integration/v1 مصرف می‌کنند و چت‌بات با widget.js نصب می‌شود. "
+                    "ورود یکپارچه از پرتال SSO سازمان (نقطه ورود: /api/v1/auth/sso/university/entry).",
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",

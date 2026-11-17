@@ -60,11 +60,11 @@ export default function Login() {
               <GraduationCap size={28} className="text-white" />
             </div>
             <h1 className="mt-6 text-2xl font-bold leading-9 text-slate-100">
-              دستیار آموزشی و<br /><span className="grad-text">آیین‌نامه‌ای دانشجو۳۶۰</span>
+              <span className="grad-text">آموزش‌یار۳۶۰</span>
             </h1>
             <p className="mt-4 text-sm leading-7 text-slate-400">
-              پاسخ مستند با ارجاع به متن رسمی آیین‌نامه، ارزیابی قطعی شرایط شما با
-              موتور قواعد، یادآور مهلت‌ها و درخواست مستقیم از کارشناس آموزش.
+              پاسخ مستند از آیین‌نامه، دستورالعمل و بخشنامه با ارجاع به متن رسمی؛ ارزیابی قطعی
+              شرایط شما با موتور قواعد، یادآور مهلت‌ها و درخواست مستقیم از کارشناس آموزش.
             </p>
           </div>
           <ul className="space-y-2.5 text-sm text-slate-300/90">
@@ -88,7 +88,7 @@ export default function Login() {
             <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 flex items-center justify-center">
               <GraduationCap size={22} className="text-white" />
             </div>
-            <div className="font-bold">دستیار آموزشی دانشجو۳۶۰</div>
+            <div className="font-bold">آموزش‌یار۳۶۰</div>
           </div>
 
           <h2 className="text-xl font-bold text-slate-100">ورود به سامانه</h2>
@@ -145,12 +145,12 @@ export default function Login() {
             {oidc && (
               <button className="btn btn-ghost w-full" disabled={ssoBusy === 'university'} onClick={() => ssoStart(oidc)}>
                 {ssoBusy === 'university' ? <Loader2 size={15} className="spin" /> : <Fingerprint size={15} />}
-                ورود یکپارچه دانشگاه (SSO)
+                ورود یکپارچه سازمانی (SSO) — پرتال دانشجو۳۶۰
               </button>
             )}
             {!oidc && (
               <p className="text-[11px] text-slate-600 leading-5">
-                ورود یکپارچه دانشگاهی (Keycloak/OIDC) پس از پیکربندی مدیر سیستم فعال می‌شود.
+                ورود یکپارچه سازمانی (پرتال SSO) پس از پیکربندی مدیر سیستم فعال می‌شود.
               </p>
             )}
           </div>

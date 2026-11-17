@@ -8,7 +8,7 @@
 git clone https://github.com/hjalilvand2004-coder/DastyarAmoozeshi.git
 cd DastyarAmoozeshi
 pip install -r requirements.txt
-python run.py            # وب‌اپ: http://127.0.0.1:8600 — مستندات API: /api/docs
+python run.py            # وب‌اپ: http://127.0.0.1:8091 — مستندات API: /api/docs
 ```
 
 - در اولین اجرا پوشه `data/` کنار پروژه ساخته و دیتابیس با داده نمونه (غیررسمی) مقداردهی می‌شود.
@@ -21,7 +21,7 @@ python run.py            # وب‌اپ: http://127.0.0.1:8600 — مستندات
 ```bash
 cd frontend
 npm install
-npm run dev      # http://localhost:5173 با پراکسی /api به 8600
+npm run dev      # http://localhost:5173 با پراکسی /api به 8091
 npm run build    # خروجی در frontend/dist (بک‌اند آن را سرو می‌کند)
 ```
 

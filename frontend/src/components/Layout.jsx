@@ -46,8 +46,8 @@ export default function Layout() {
               <GraduationCap size={20} className="text-white" />
             </div>
             <div>
-              <div className="font-bold text-sm text-slate-100">دستیار آموزشی</div>
-              <div className="text-[11px] text-slate-500">زیرسیستم دانشجو۳۶۰</div>
+              <div className="font-bold text-sm text-slate-100">آموزش‌یار۳۶۰</div>
+              <div className="text-[11px] text-slate-500">پرتال دانشجو۳۶۰</div>
             </div>
           </div>
         </div>

@@ -5,7 +5,16 @@ import api, { errMsg } from '../api'
 import { Chip, EmptyState, RULE_STATE_CHIP, RULE_STATE_FA, Spinner } from '../ui'
 
 const SUGGESTIONS = ['شرایط ثبت‌نام کارورزی چیست؟', 'سقف واحد دانشجوی مشروط چقدر است؟',
-  'حذف و اضافه چگونه انجام می‌شود؟', 'شرایط انتقالی چیست؟']
+  'مهلت پرداخت شهریه در بخشنامه‌ها چیست؟', 'حذف و اضافه چگونه انجام می‌شود؟']
+
+// نوع سند: محدودسازی پرس‌وجو به آیین‌نامه / دستورالعمل / بخشنامه
+const CATS = [
+  { id: 'all', label: 'همه اسناد', icon: '📚' },
+  { id: 'ayinnameh', label: 'آیین‌نامه', icon: '📕' },
+  { id: 'dastoorolamal', label: 'دستورالعمل', icon: '📗' },
+  { id: 'bakhshnameh', label: 'بخشنامه', icon: '📘' },
+  { id: 'other', label: 'سایر', icon: '📄' },
+]
 
 export default function Chat() {
   const [sessions, setSessions] = useState([])
@@ -15,6 +24,7 @@ export default function Chat() {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState('')
   const [includeRetired, setIncludeRetired] = useState(false)
+  const [docCategory, setDocCategory] = useState('all')
   const [loadingHistory, setLoadingHistory] = useState(true)
   const endRef = useRef(null)
 
@@ -42,7 +52,10 @@ export default function Chat() {
     setInput(''); setErr(''); setBusy(true)
     setMessages((m) => [...m, { role: 'user', content: question }])
     try {
-      const { data } = await api.post('/chat/ask', { question, session_id: sessionId, include_retired: includeRetired })
+      const { data } = await api.post('/chat/ask', {
+        question, session_id: sessionId, include_retired: includeRetired,
+        doc_category: docCategory === 'all' ? null : docCategory,
+      })
       const ans = data.answer
       setSessionId(ans.session_id)
       setMessages((m) => [...m, { role: 'assistant', content: ans.short || ans.note || '—', answer: ans }])
@@ -57,8 +70,8 @@ export default function Chat() {
     <div className="fade-up">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-slate-100">دستیار مستند آیین‌نامه</h1>
-          <p className="text-sm text-slate-500 mt-1">پاسخ سه‌لایه: متن رسمی سند ← توضیح ساده ← وضعیت شخصی شما. همه پاسخ‌ها استناد واقعی دارند.</p>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-100">پرسش از آیین‌نامه، دستورالعمل و بخشنامه</h1>
+          <p className="text-sm text-slate-500 mt-1">سیستم در حافظه دانش خود جست‌وجو می‌کند و پاسخ سه‌لایه می‌دهد: متن رسمی سند ← توضیح ساده ← وضعیت شخصی شما. همه پاسخ‌ها استناد واقعی دارند.</p>
         </div>
         <div className="flex items-center gap-2">
           <label className="flex items-center gap-1.5 text-xs text-slate-400 cursor-pointer select-none">
@@ -109,7 +122,18 @@ export default function Chat() {
 
         {err && <div className="mx-4 mb-2 text-sm text-rose-300 bg-rose-500/10 border border-rose-500/30 rounded-xl px-3 py-2">{err}</div>}
 
-        <div className="p-3 md:p-4 border-t border-white/[.07]">
+        {/* فیلتر نوع سند */}
+        <div className="px-3 md:px-4 pb-2 flex flex-wrap gap-1.5">
+          {CATS.map((c) => (
+            <button key={c.id} disabled={busy}
+              onClick={() => setDocCategory(c.id)}
+              className={`btn btn-sm ${docCategory === c.id ? 'btn-primary' : 'btn-ghost'}`}>
+              <span aria-hidden>{c.icon}</span> {c.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-3 md:p-4 pt-1 border-t border-white/[.07]">
           <div className="flex gap-2">
             <textarea className="textarea resize-none" rows={1} placeholder="پرسش خود را بنویسید…"
               value={input} onChange={(e) => setInput(e.target.value)}
@@ -160,6 +184,7 @@ function AssistantMsg({ answer, content }) {
                   <div key={s.ref} className="bg-black/20 rounded-xl p-3 mb-2 last:mb-0">
                     <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
                       <Chip tone="chip-violet">{s.ref}</Chip>
+                      {s.doc_category_fa && <Chip tone="chip-sky">{s.doc_category_fa}</Chip>}
                       <span className="text-xs font-bold text-slate-200">{s.doc_title}</span>
                       <Chip tone="chip-slate">نسخه {s.version_no}</Chip>
                       {s.clause_ref && <Chip tone="chip-sky">{s.clause_ref}</Chip>}

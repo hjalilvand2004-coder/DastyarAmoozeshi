@@ -1,6 +1,6 @@
 # راهنمای ادغام با سایر سامانه‌ها — نسخه ۰.۳.۰
 
-این سند توضیح می‌دهد چگونه هر سامانه دیگر (پژوهشیار، برنامه‌ریز، پرتال دانشجو، اپ موبایل، LMS، ...) از خدمات «دستیار آموزشی و آیین‌نامه‌ای دانشجو۳۶۰» استفاده کند — از یک پرسش ساده تا حضور کامل چت‌بات هوشمند در صفحات آن سامانه.
+این سند توضیح می‌دهد چگونه هر سامانه دیگر (پژوهشیار، برنامه‌ریز، پرتال دانشجو، اپ موبایل، LMS، ...) از خدمات «آموزش‌یار۳۶۰» استفاده کند — از یک پرسش ساده تا حضور کامل چت‌بات هوشمند در صفحات آن سامانه.
 
 > **هشدار:** تا زمانی که اسناد رسمی دانشگاه ثبت نشده، همه پاسخ‌ها بر اساس داده «نمونه و غیررسمی» است و با برچسب هشدار همراه می‌آید. هیچ پاسخی بدون استناد به سند ارائه نمی‌شود.
 
@@ -67,7 +67,7 @@ X-API-Key: d360_0123abcd...
 ### ۴.۱ پرسش مستند — `POST /ask` (اسکوپ `ask`)
 
 ```bash
-curl -X POST http://127.0.0.1:8600/api/v1/integration/v1/ask \
+curl -X POST http://127.0.0.1:8091/api/v1/integration/v1/ask \
   -H "X-API-Key: d360_..." -H "Content-Type: application/json" \
   -d '{
     "question": "دانشجویی با معدل ۱۴/۵ می‌خواهد کارورزی ثبت‌نام کند، شرایط چیست؟",
@@ -124,10 +124,10 @@ curl -X POST http://127.0.0.1:8600/api/v1/integration/v1/ask \
 در انتهای `<body>` صفحات سامانه میزبان:
 
 ```html
-<script src="http://SERVER:8600/api/v1/integration/widget.js"
+<script src="http://SERVER:8091/api/v1/integration/widget.js"
         data-key="d360_..."
-        data-url="http://SERVER:8600"
-        data-title="دستیار آیین‌نامه‌ای"
+        data-url="http://SERVER:8091"
+        data-title="آموزش‌یار۳۶۰"
         data-position="left"></script>
 ```
 
@@ -136,7 +136,7 @@ curl -X POST http://127.0.0.1:8600/api/v1/integration/v1/ask \
 - پروفایل پویا: سامانه میزبان قبل از ارسال، `window.DastyarStudent = { gpa: 14.5, ... }` تنظیم کند
 - یا پروفایل ثابت با `data-student='{"gpa":14.5}'`
 - کلید ویجت در صفحه میزبان دیده می‌شود → اسکوپ را فقط `ask` بگذارید و سقف نرخ جداگانه تعیین کنید (فیلتر Referer در نقشه راه است)
-- صفحه آزمایش آماده: `http://SERVER:8600/integration-demo?key=d360_...` (شبیه‌سازی میزبانی در «پژوهشیار»)
+- صفحه آزمایش آماده: `http://SERVER:8091/integration-demo?key=d360_...` (شبیه‌سازی میزبانی در «پژوهشیار»)
 
 ## ۶) نمونه‌های سریع
 
@@ -145,7 +145,7 @@ curl -X POST http://127.0.0.1:8600/api/v1/integration/v1/ask \
 ```python
 import requests
 
-BASE = "http://127.0.0.1:8600"
+BASE = "http://127.0.0.1:8091"
 KEY = "d360_..."
 
 def check_regulation(question: str, student: dict) -> dict:
@@ -169,7 +169,7 @@ print(check_regulation("شرایط استفاده از دستیار آموزشی
 ### جاوااسکریپت (برنامه‌ریز — نمایش مهلت‌ها در کارتابل دانشجو)
 
 ```js
-const res = await fetch('http://SERVER:8600/api/v1/integration/v1/deadlines?days=30', {
+const res = await fetch('http://SERVER:8091/api/v1/integration/v1/deadlines?days=30', {
   headers: { 'X-API-Key': KEY },
 })
 const { deadlines } = await res.json()

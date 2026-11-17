@@ -155,14 +155,29 @@ function SettingsTab() {
     rate_limit_chat_per_hour: 'حد پرسش در ساعت (هر کاربر)',
     search_max_chunks: 'حداکثر تکه‌های استنادی هر پاسخ',
     grad_required_credits: 'واحد لازم برای فارغ‌التحصیلی',
-    sso_oidc_issuer: 'آدرس IdP دانشگاه (Keycloak/OIDC)',
-    sso_oidc_client_id: 'شناسه سرویس‌گیرنده SSO',
-    sso_oidc_client_secret: 'رمز سرویس‌گیرنده SSO (مخفی)',
+    public_base_url: 'آدرس عمومی سامانه (مبنای ورود یکپارچه) — مثل http://188.212.96.235:8091',
+    sso_oidc_issuer: 'آدرس پرتال SSO سازمان (مثل http://188.212.96.235:8086)',
+    sso_oidc_client_id: 'شناسه سرویس‌گیرنده در پرتال SSO (مثل amoozeshyar360)',
+    sso_oidc_client_secret: 'رمز سرویس‌گیرنده SSO (مخفی — کلاینت عمومی خالی بماند)',
+    sso_oidc_scope: 'اسکوپ‌های SSO (پیش‌فرض: openid profile)',
+    sso_app_key: 'کلید سامانه در پرتال SSO (مبنای نگاشت نقش‌ها مثل amoozeshyar.admin)',
+    sso_hub_secret: 'رمز مشترک توکن HS256 پرتال (اختیاری، مخفی)',
   }
-  const SECRET = ['llm_api_key', 'sso_oidc_client_secret']
+  const SECRET = ['llm_api_key', 'sso_oidc_client_secret', 'sso_hub_secret']
+  const entryUrl = (st.public_base_url || '').replace(/\/+$/, '') + '/api/v1/auth/sso/university/entry'
 
   return (
     <div className="space-y-3 max-w-3xl">
+      {st.public_base_url && st.sso_oidc_issuer && (
+        <div className="glass p-4 border border-violet-500/30">
+          <div className="text-sm font-bold text-violet-200 mb-1.5">آدرس ورود برای ثبت در پرتال SSO سازمانی</div>
+          <code dir="ltr" className="block text-xs bg-black/30 rounded-lg px-3 py-2 text-cyan-300 break-all">{entryUrl}</code>
+          <p className="text-[11px] text-slate-400 leading-6 mt-2">
+            این آدرس را در «مدیریت سامانه‌ها» پرتال SSO در فیلد «آدرس ورود (نقطه ورود OIDC)» سامانه
+            آموزش‌یار۳۶۰ ثبت کنید؛ Client ID باید با «شناسه سرویس‌گیرنده» بالا یکی باشد.
+          </p>
+        </div>
+      )}
       {Object.entries(LABELS).map(([k, label]) => (
         <div key={k} className="glass p-4">
           <label className="lbl">{label}</label>
@@ -176,7 +191,8 @@ function SettingsTab() {
         </div>
       ))}
       <p className="text-xs text-slate-500 leading-6">
-        پس از ثبت «آدرس IdP دانشگاه»، گزینه «ورود یکپارچه دانشگاه (SSO)» در صفحه ورود فعال می‌شود.
+        پس از ثبت «آدرس پرتال SSO سازمان»، گزینه «ورود یکپارچه سازمانی (SSO)» در صفحه ورود فعال می‌شود؛
+        اگر کاربر در پرتال SSO نشست فعال داشته باشد، ورود بدون رمز انجام می‌گیرد.
         کلیدها فقط با نقش مدیر سیستم قابل ویرایش‌اند و مقادیر مخفی با «•••» نمایش داده می‌شوند.
       </p>
     </div>

@@ -53,6 +53,72 @@ def parse_token(token: str) -> dict | None:
     except Exception:
         return None
 
+
+# ---------- اعتبارسنجی توکن‌های دریافتی از پرتال SSO (بدون وابستگی خارجی) ----------
+
+_B64 = base64.urlsafe_b64decode  # میان‌بر
+
+# پیشوند DER ساختار DigestInfo برای SHA-256 در امضای PKCS#1 v1.5
+_SHA256_DIGESTINFO = bytes.fromhex("3031300d060960864801650304020105000420")
+
+
+def _jwk_b64int(v: str) -> int:
+    return int.from_bytes(_B64(v + "=" * (-len(v) % 4)), "big")
+
+
+def verify_jwt_rs256(token: str, jwks: dict) -> dict | None:
+    """اعتبارسنجی JWT امضاشده با RS256 بر اساس کلیدهای عمومی IdP (jwks_uri)"""
+    try:
+        h, p, s = token.split(".")
+        header = _json.loads(_B64(h + "=" * (-len(h) % 4)))
+        if str(header.get("alg", "")).upper() != "RS256":
+            return None
+        kid = header.get("kid")
+        key = None
+        for k in jwks.get("keys", []):
+            if k.get("kty") == "RSA" and (kid is None or k.get("kid") == kid):
+                if k.get("alg") and str(k["alg"]).upper() != "RS256":
+                    continue
+                key = k
+                break
+        if not key or "n" not in key or "e" not in key:
+            return None
+        sig = _B64(s + "=" * (-len(s) % 4))
+        n, e = _jwk_b64int(key["n"]), _jwk_b64int(key["e"])
+        klen = (n.bit_length() + 7) // 8
+        m = pow(int.from_bytes(sig, "big"), e, n)
+        padded = m.to_bytes(klen, "big")
+        digest = hashlib.sha256(f"{h}.{p}".encode("ascii")).digest()
+        expected = b"\x00\x01" + b"\xff" * (klen - len(digest) - len(_SHA256_DIGESTINFO) - 3) + \
+            b"\x00" + _SHA256_DIGESTINFO + digest
+        if not hmac.compare_digest(padded, expected):
+            return None
+        body = _json.loads(_B64(p + "=" * (-len(p) % 4)))
+        if int(body.get("exp", 0)) < time.time():
+            return None
+        return body
+    except Exception:
+        return None
+
+
+def verify_jwt_hs256(token: str, secret: str) -> dict | None:
+    """اعتبارسنجی JWT امضاشده با رمز مشترک HS256 (توکن صادرشدهٔ پرتال سازمانی)"""
+    try:
+        h, p, s = token.split(".")
+        header = _json.loads(_B64(h + "=" * (-len(h) % 4)))
+        if str(header.get("alg", "")).upper() != "HS256":
+            return None
+        expected = hmac.new(secret.encode("utf-8"), f"{h}.{p}".encode("ascii"), hashlib.sha256).digest()
+        got = _B64(s + "=" * (-len(s) % 4))
+        if not hmac.compare_digest(expected, got):
+            return None
+        body = _json.loads(_B64(p + "=" * (-len(p) % 4)))
+        if int(body.get("exp", 0)) < time.time():
+            return None
+        return body
+    except Exception:
+        return None
+
 # الگوهای مشکوک به تزریق دستور (انگلیسی + فارسی)
 INJECTION_PATTERNS = [
     r"ignore\s+(all\s+)?(previous|prior|above)\s+(instructions?|prompts?)",

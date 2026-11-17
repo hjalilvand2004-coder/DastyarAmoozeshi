@@ -10,6 +10,7 @@ export default function Regulations() {
   const [docs, setDocs] = useState(null)
   const [q, setQ] = useState('')
   const [status, setStatus] = useState('all')
+  const [cat, setCat] = useState('all')
   const [detail, setDetail] = useState(null)
   const [importOpen, setImportOpen] = useState(false)
   const [err, setErr] = useState('')
@@ -17,8 +18,11 @@ export default function Regulations() {
   const load = () => api.get('/regulations').then(({ data }) => setDocs(data.documents)).catch((e) => setErr(errMsg(e)))
   useEffect(() => { load() }, [])
 
+  const CAT_FA = { ayinnameh: 'آیین‌نامه', dastoorolamal: 'دستورالعمل', bakhshnameh: 'بخشنامه', other: 'سایر' }
+
   const filtered = (docs || []).filter((d) =>
     (status === 'all' || d.status === status) &&
+    (cat === 'all' || (d.doc_category || 'other') === cat) &&
     (!q || (d.title || '').includes(q)))
 
   const doStatus = async (id, st) => {
@@ -52,6 +56,13 @@ export default function Regulations() {
             {s === 'all' ? 'همه' : STATUS_FA[s]}
           </button>
         ))}
+        <span className="w-px h-5 bg-white/10 mx-1" />
+        {[['all', 'همه انواع'], ['ayinnameh', 'آیین‌نامه'], ['dastoorolamal', 'دستورالعمل'], ['bakhshnameh', 'بخشنامه'], ['other', 'سایر']].map(([c, label]) => (
+          <button key={c} onClick={() => setCat(c)}
+            className={`btn btn-sm ${cat === c ? 'btn-primary' : 'btn-ghost'}`}>
+            {label}
+          </button>
+        ))}
       </div>
 
       {err && <div className="text-sm text-rose-300 mb-3">{err}</div>}
@@ -67,8 +78,12 @@ export default function Regulations() {
                 <h3 className="font-bold text-slate-100 leading-6">{d.title}</h3>
                 <Chip tone={STATUS_CHIP[d.status]}>{STATUS_FA[d.status]}</Chip>
               </div>
+              <div className="flex flex-wrap gap-1.5">
+                <Chip tone="chip-sky">{CAT_FA[d.doc_category || 'other']}</Chip>
+                <Chip tone="chip-slate">نسخه {d.version_no}</Chip>
+              </div>
               <div className="text-xs text-slate-500 space-y-1 flex-1">
-                <div>نسخه: {d.version_no} · نوع: {d.doc_type === 'pdf' ? 'PDF' : d.doc_type === 'docx' ? 'Word' : 'متنی'}</div>
+                <div>قالب: {d.doc_type === 'pdf' ? 'PDF' : d.doc_type === 'docx' ? 'Word' : 'متنی'}</div>
                 {(d.scope_level || d.scope_major) && <div>دامنه: {[d.scope_level, d.scope_major].filter(Boolean).join(' - ') || '—'}{d.scope_entry_from ? ` · ورودی ${d.scope_entry_from}${d.scope_entry_to ? ` تا ${d.scope_entry_to}` : ''}` : ''}</div>}
                 {d.effective_from && <div>اجرا از: {jalaliStr(d.effective_from)}{d.effective_until ? ` تا ${jalaliStr(d.effective_until)}` : ''}</div>}
                 {d.retired_reason && <div className="text-rose-300/70">ابطال: {d.retired_reason}</div>}
@@ -142,6 +157,7 @@ function DetailModal({ doc, onClose, canApprove, canCreate, doStatus, doRevise }
 function ImportModal({ onClose }) {
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
+  const [docCat, setDocCat] = useState('ayinnameh')
   const [scopeLevel, setScopeLevel] = useState('')
   const [scopeMajor, setScopeMajor] = useState('')
   const [file, setFile] = useState(null)
@@ -155,11 +171,12 @@ function ImportModal({ onClose }) {
       if (file) {
         const fd = new FormData()
         fd.append('title', title); fd.append('file', file)
+        fd.append('doc_category', docCat)
         if (scopeLevel) fd.append('scope_level', scopeLevel)
         if (scopeMajor) fd.append('scope_major', scopeMajor)
         await api.post('/regulations/import-file', fd)
       } else {
-        await api.post('/regulations/import', { title, text, scope_level: scopeLevel || null, scope_major: scopeMajor || null })
+        await api.post('/regulations/import', { title, text, doc_category: docCat, scope_level: scopeLevel || null, scope_major: scopeMajor || null })
       }
       onClose()
     } catch (e2) { setErr(errMsg(e2)) } finally { setBusy(false) }
@@ -170,7 +187,17 @@ function ImportModal({ onClose }) {
       <form onSubmit={submit} className="space-y-3">
         <div><label className="lbl">عنوان سند *</label><input className="input" value={title} onChange={(e) => setTitle(e.target.value)} required /></div>
         <div className="grid grid-cols-2 gap-3">
+          <div><label className="lbl">نوع سند</label>
+            <select className="select" value={docCat} onChange={(e) => setDocCat(e.target.value)}>
+              <option value="ayinnameh">آیین‌نامه</option>
+              <option value="dastoorolamal">دستورالعمل</option>
+              <option value="bakhshnameh">بخشنامه</option>
+              <option value="other">سایر</option>
+            </select>
+          </div>
           <div><label className="lbl">مقطع (اختیاری)</label><input className="input" placeholder="مثلاً کارشناسی" value={scopeLevel} onChange={(e) => setScopeLevel(e.target.value)} /></div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
           <div><label className="lbl">رشته (اختیاری)</label><input className="input" placeholder="مثلاً مهندسی کامپیوتر" value={scopeMajor} onChange={(e) => setScopeMajor(e.target.value)} /></div>
         </div>
         <div>
