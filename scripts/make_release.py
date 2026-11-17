@@ -94,7 +94,7 @@ def main() -> int:
     sha = (ROOT / "dist" / "sha256.txt").read_text(encoding="ascii").strip().split()[0]
 
     # ساخت یا بازیابی ریلیز
-    payload = {"tag_name": TAG, "target_commitish": "main", "name": f"نسخه {TAG} — منتشر اولیه",
+    payload = {"tag_name": TAG, "target_commitish": "main", "name": f"نسخه {TAG} — آموزش‌یار۳۶۰",
                "body": BODY + f"\n\nSHA256 (Portable): `{sha}`\n",
                "draft": False, "prerelease": False}
     try:
