@@ -10,11 +10,23 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
-from app import integration
+from app import db, integration
 from app.api.deps import get_conn, get_current_user
 from app.services import require
 
 router = APIRouter(prefix="/integrations", tags=["integrations - مدیریت سامانه‌های متصل"])
+
+
+@router.get("/msu/config", summary="پیکربندی ویجت داشیار «دانشگاه هوشمند من» (پایین‌چپ)")
+def msu_config(user: dict = Depends(get_current_user), conn=Depends(get_conn)):
+    """تنظیمات ویجت داشیار برای بارگذاری در رابط؛ مدیر از «مدیریت سیستم ← تنظیمات» تغییر می‌دهد"""
+    st = db.get_settings(conn)
+    return {
+        "enabled": st.get("msu_agent_enabled", "1") == "1",
+        "url": (st.get("msu_agent_url") or "").rstrip("/"),
+        "origin": st.get("msu_agent_origin") or "amoozeshyar360",
+        "system_url": "http://188.212.96.235:8096/frontend/",
+    }
 
 
 @router.get("/scopes", summary="کاتالوگ اسکوپ‌های موجود برای سامانه‌های متصل")

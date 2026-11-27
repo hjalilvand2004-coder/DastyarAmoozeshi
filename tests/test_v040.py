@@ -308,3 +308,35 @@ def test_verify_jwt_rs256_with_jwks():
 def test_doc_categories_constant():
     assert DOC_CATEGORIES == {"ayinnameh": "آیین‌نامه", "dastoorolamal": "دستورالعمل",
                               "bakhshnameh": "بخشنامه", "other": "سایر"}
+
+
+# ---------- نسخه ۰.۵.۰: ویجت داشیار «دانشگاه هوشمند من» ----------
+
+def test_msu_agent_js_served(client):
+    r = client.get("/api/v1/integration/msu-agent.js")
+    assert r.status_code == 200
+    assert "javascript" in r.headers["content-type"]
+    assert "MSUAgent" in r.text
+    assert "MSUHostContext" in r.text  # پل وضعیت دانشجو
+
+
+def test_msu_config_requires_auth(client):
+    assert client.get("/api/v1/integrations/msu/config").status_code == 401
+
+
+def test_msu_config_defaults(client):
+    r = client.post("/api/v1/auth/login", json={"username": "student", "password": "Student@123"})
+    h = {"Authorization": f"Bearer {r.json()['token']}"}
+    d = client.get("/api/v1/integrations/msu/config", headers=h).json()
+    assert d["enabled"] is True
+    assert d["url"] == "http://188.212.96.235:8096"
+    assert d["origin"] == "amoozeshyar360"
+
+
+def test_msu_disabled_via_setting(client):
+    r = client.post("/api/v1/auth/login", json={"username": "admin", "password": "Admin@123"})
+    h = {"Authorization": f"Bearer {r.json()['token']}"}
+    client.post("/api/v1/admin/settings", json={"key": "msu_agent_enabled", "value": "0"}, headers=h)
+    d = client.get("/api/v1/integrations/msu/config", headers=h).json()
+    assert d["enabled"] is False
+    client.post("/api/v1/admin/settings", json={"key": "msu_agent_enabled", "value": "1"}, headers=h)

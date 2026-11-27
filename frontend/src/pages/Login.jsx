@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Fingerprint, GraduationCap, Loader2, Lock, LogIn, User } from 'lucide-react'
+import { Fingerprint, GraduationCap, Loader2, Lock, LogIn, MoonStar, SunMedium, User } from 'lucide-react'
 import api, { errMsg, withGateway } from '../api'
 import { useAuth } from '../auth'
+import { currentTheme, toggleTheme } from '../theme'
 import { faNum } from '../jalali'
 
 export default function Login() {
@@ -16,6 +17,7 @@ export default function Login() {
   const [demoIdentity, setDemoIdentity] = useState('student')
   const [ssoBusy, setSsoBusy] = useState('')
   const [showHint, setShowHint] = useState(false)
+  const [theme, setTheme] = useState(currentTheme())
 
   useEffect(() => {
     api.get('/auth/sso/providers').then(({ data }) => setProviders(data.providers)).catch(() => {})
@@ -51,6 +53,10 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4" dir="rtl">
       <div className="aurora" />
+      <button className="theme-toggle fixed top-4 left-4 z-20" title={theme === 'light' ? 'حالت شب' : 'حالت روز'}
+        onClick={() => setTheme(toggleTheme())}>
+        {theme === 'light' ? <MoonStar size={16} /> : <SunMedium size={16} />}
+      </button>
 
       <div className="w-full max-w-4xl grid lg:grid-cols-2 gap-0 glass-strong overflow-hidden fade-up">
         {/* پنل برند */}

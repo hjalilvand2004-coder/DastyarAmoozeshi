@@ -25,7 +25,7 @@ from app.config import APP_NAME, frontend_dist_candidates
 from app.security import RATE_LIMITER
 from app.api.routers import (admin, advisor, auth, chat, deadlines, integration_v1,
                              integrations, processes, regulations, rules, tickets)
-from app.widget_assets import DEMO_HTML, WIDGET_JS
+from app.widget_assets import DEMO_HTML, MSU_WIDGET_JS, WIDGET_JS
 
 
 def _find_frontend() -> Path | None:
@@ -125,6 +125,13 @@ def create_app() -> FastAPI:
     @app.get("/widget.js", include_in_schema=False)
     def widget_js():
         return Response(WIDGET_JS, media_type="application/javascript",
+                        headers={"Cache-Control": "no-cache"})
+
+    # ---------- ویجت داشیار «دانشگاه هوشمند من» (نمایندهٔ هسته عامل در این سامانه) ----------
+    @app.get("/api/v1/integration/msu-agent.js", include_in_schema=False)
+    @app.get("/msu-agent.js", include_in_schema=False)
+    def msu_agent_js():
+        return Response(MSU_WIDGET_JS, media_type="application/javascript",
                         headers={"Cache-Control": "no-cache"})
 
     @app.get("/integration-demo", include_in_schema=False,

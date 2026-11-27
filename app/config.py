@@ -6,7 +6,7 @@ from pathlib import Path
 
 APP_NAME = "آموزش‌یار۳۶۰"
 APP_NAME_SHORT = "آموزش‌یار۳۶۰"
-VERSION = "0.4.0"
+VERSION = "0.5.0"
 ORG = "Student360"
 
 # پرتال ورود یکپارچه سازمانی (هاب SSO) و آدرس استقرار این سامانه
@@ -61,6 +61,10 @@ DEFAULT_SETTINGS = {
     "sso_oidc_scope": "openid profile",
     "sso_app_key": DEFAULT_SSO_APP_KEY,              # کلید سامانه در پرتال (مبنای نگاشت نقش‌ها)
     "sso_hub_secret": "",                            # اختیاری: رمز مشترک HS256 برای توکن امضاشدهٔ پرتال
+    # ویجت داشیار «دانشگاه هوشمند من» — پایین‌چپ صفحه، متصل به هسته عامل
+    "msu_agent_url": "http://188.212.96.235:8096",   # هاست هسته داشیار (سرو /api/chat و /widget.js)
+    "msu_agent_origin": "amoozeshyar360",            # شناسه این سامانه برای هسته داشیار
+    "msu_agent_enabled": "1",                        # ۱ = نمایش ویجت پایین‌چپ برای کاربران واردشده
 }
 
 

@@ -1,11 +1,15 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   BookOpenText, CalendarClock, ClipboardList, FlaskConical, GraduationCap,
-  LayoutDashboard, LifeBuoy, LogOut, Map, MessageSquareText, Settings2, ShieldAlert, Blocks,
+  LayoutDashboard, LifeBuoy, LogOut, Map, MessageSquareText, MoonStar, Settings2,
+  ShieldAlert, Blocks, SunMedium,
 } from 'lucide-react'
 import { useAuth } from '../auth'
 import { Chip } from '../ui'
+import api from '../api'
+import { currentTheme, toggleTheme } from '../theme'
+import { bootMsuAgent, updateMsuContext } from '../msuAgent'
 
 const NAV = [
   { to: '/', label: 'میزکار', icon: LayoutDashboard, perm: null },
@@ -23,13 +27,22 @@ const NAV = [
 export default function Layout() {
   const { user, signOut, can } = useAuth()
   const nav = useNavigate()
+  const loc = useLocation()
   const [menu, setMenu] = useState(false)
   const [now, setNow] = useState(new Date())
+  const [theme, setTheme] = useState(currentTheme())
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 60000)
     return () => clearInterval(t)
   }, [])
+
+  // ویجت داشیار «دانشگاه هوشمند من» (پایین‌چپ) + پل آخرین وضعیت دانشجو
+  useEffect(() => { bootMsuAgent() }, [])
+  useEffect(() => {
+    updateMsuContext(user, null)
+    api.get('/auth/me').then(({ data }) => updateMsuContext(data.user, data.student)).catch(() => {})
+  }, [user?.id, loc.pathname])
 
   const items = NAV.filter((n) => !n.perm || can(n.perm))
   const greeting = now.getHours() < 12 ? 'صبح بخیر' : now.getHours() < 18 ? 'وقت بخیر' : 'شب بخیر'
@@ -81,6 +94,10 @@ export default function Layout() {
           </button>
           <div className="hidden sm:block text-sm text-slate-400">{greeting}، <span className="text-slate-200 font-semibold">{user.full_name || user.username}</span></div>
           <div className="flex-1" />
+          <button className="theme-toggle" title={theme === 'light' ? 'حالت شب' : 'حالت روز'}
+            onClick={() => setTheme(toggleTheme())}>
+            {theme === 'light' ? <MoonStar size={16} /> : <SunMedium size={16} />}
+          </button>
           <Chip tone="chip-amber"><ShieldAlert size={12} /> داده نمونه — غیررسمی</Chip>
           <button className="lg:hidden btn btn-ghost btn-sm" onClick={() => { signOut(); nav('/login') }}><LogOut size={15} /></button>
         </header>
@@ -101,7 +118,7 @@ export default function Layout() {
         </main>
 
         <footer className="px-8 py-4 text-center text-xs text-slate-600 mt-auto">
-          دستیار آموزشی و آیین‌نامه‌ای — بخشی از زیرسیستم دانشجو۳۶۰ · پاسخ‌ها راهنمای خودکارند و جایگزین حکم رسمی دانشگاه نیستند
+          آموزش‌یار۳۶۰ — زیرسیستم پرتال دانشجو۳۶۰ · پاسخ‌ها راهنمای خودکارند و جایگزین حکم رسمی دانشگاه نیستند
         </footer>
       </div>
     </div>

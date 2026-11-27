@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/* ==================================================
+   تم «Aurora Premium» — آموزش‌یار۳۶۰
+   شیشه‌ای (Glassmorphism) + گرادیان Aurora
+   حالت شب = پیش‌فرض (:root) · حالت روز = html.light-theme
+   توکن‌ها مطابق aurora-theme.css سامانهٔ «دانشگاه هوشمند من»
+   ================================================== */
+
 /* ---------- فونت وزیرمتن (باندل محلی - آفلاین) ---------- */
 @font-face { font-family: "Vazirmatn"; src: url("/fonts/vazirmatn-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
 @font-face { font-family: "Vazirmatn"; src: url("/fonts/vazirmatn-500.woff2") format("woff2"); font-weight: 500; font-display: swap; }
@@ -10,71 +17,121 @@
   --font-sans: "Vazirmatn", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-:root { color-scheme: dark; }
+/* ==================================================
+   ۱) توکن‌های طراحی — حالت شب (پیش‌فرض)
+   ================================================== */
+:root {
+  color-scheme: dark;
+
+  /* پس‌زمینه‌های لایه‌ای */
+  --bg-deep: #050514;
+  --bg-1: #0f0c29;
+  --bg-2: #1a1342;
+
+  /* سطوح شیشه‌ای */
+  --glass-bg: rgba(255, 255, 255, .06);
+  --glass-border: rgba(255, 255, 255, .12);
+  --glass-strong: rgba(15, 12, 41, .78);
+
+  /* متن */
+  --text-1: #f8fafc;
+  --text-2: #cbd5e1;
+  --text-3: #94a3b8;
+
+  /* رنگ‌های تأکیدی (Aurora: بنفش → صورتی) */
+  --accent: #a78bfa;
+  --accent-2: #f472b6;
+  --accent-3: #38bdf8;
+
+  /* وضعیت‌ها */
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --info: #38bdf8;
+
+  /* شعاع گوشه */
+  --radius-xl: 24px;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  /* سایه‌ها */
+  --shadow-glow: 0 8px 32px rgba(167, 139, 250, .30);
+  --shadow-card: 0 8px 24px rgba(0, 0, 0, .30);
+
+  /* انتقال */
+  --transition: .3s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ==================================================
+   ۲) پایه
+   ================================================== */
 html, body, #root { height: 100%; }
 body {
   margin: 0;
-  background: #05070f;
-  color: #e2e8f0;
   font-family: var(--font-sans);
+  background: var(--bg-deep);
+  background-image: radial-gradient(ellipse at top, var(--bg-2), var(--bg-deep) 62%);
+  background-attachment: fixed;
+  color: var(--text-1);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
+::selection { background: rgba(167, 139, 250, .35); color: #fff; }
 
-/* ---------- پس‌زمینه شفق قطبی ---------- */
+/* ---------- پس‌زمینهٔ شفق قطبی (Aurora) ---------- */
 .aurora {
   position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none;
   background:
-    radial-gradient(60rem 32rem at 85% -10%, rgba(124, 58, 237, .16), transparent 60%),
-    radial-gradient(50rem 30rem at 0% 20%, rgba(6, 182, 212, .12), transparent 55%),
-    radial-gradient(46rem 30rem at 70% 110%, rgba(236, 72, 153, .08), transparent 60%),
-    #05070f;
+    radial-gradient(64rem 36rem at 88% -12%, rgba(167, 139, 250, .20), transparent 62%),
+    radial-gradient(52rem 32rem at 2% 18%, rgba(244, 114, 182, .12), transparent 58%),
+    radial-gradient(48rem 30rem at 72% 112%, rgba(56, 189, 248, .10), transparent 60%),
+    var(--bg-deep);
+}
+.aurora::before,
+.aurora::after {
+  content: ""; position: absolute; border-radius: 50%; filter: blur(80px);
 }
 .aurora::before {
-  content: ""; position: absolute; inset: -40%;
-  background:
-    radial-gradient(28rem 22rem at 30% 35%, rgba(139, 92, 246, .14), transparent 60%),
-    radial-gradient(24rem 20rem at 70% 60%, rgba(34, 211, 238, .10), transparent 60%);
-  animation: drift 26s ease-in-out infinite alternate;
+  width: 600px; height: 600px; top: -220px; right: -180px;
+  background: radial-gradient(circle, rgba(167, 139, 250, .30), transparent 70%);
+  animation: aurora-float 18s ease-in-out infinite;
 }
 .aurora::after {
-  content: ""; position: absolute; inset: 0;
-  background-image: linear-gradient(rgba(148,163,184,.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148,163,184,.045) 1px, transparent 1px);
-  background-size: 44px 44px;
-  mask-image: radial-gradient(70rem 40rem at 50% 0%, black, transparent 75%);
+  width: 520px; height: 520px; bottom: -180px; left: -160px;
+  background: radial-gradient(circle, rgba(244, 114, 182, .24), transparent 70%);
+  animation: aurora-float 22s ease-in-out infinite reverse;
 }
-@keyframes drift {
-  0% { transform: translate3d(0,0,0) scale(1); }
-  50% { transform: translate3d(-4%, 3%, 0) scale(1.08); }
-  100% { transform: translate3d(3%, -4%, 0) scale(1.04); }
+@keyframes aurora-float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(40px, -30px); }
 }
 
 /* ---------- شیشه ---------- */
 .glass {
-  background: rgba(255, 255, 255, .045);
-  border: 1px solid rgba(255, 255, 255, .09);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  border-radius: 1.25rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-radius: var(--radius-lg);
 }
 .glass-strong {
-  background: rgba(13, 17, 33, .82);
-  border: 1px solid rgba(255, 255, 255, .10);
-  backdrop-filter: blur(24px) saturate(160%);
-  -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border-radius: 1.25rem;
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-radius: var(--radius-lg);
 }
-.card-hover { transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.card-hover { transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition); }
 .card-hover:hover {
   transform: translateY(-3px);
-  border-color: rgba(167, 139, 250, .45);
-  box-shadow: 0 18px 40px -18px rgba(124, 58, 237, .35);
+  border-color: rgba(167, 139, 250, .50);
+  box-shadow: var(--shadow-glow);
 }
 
 /* ---------- گرادیان و متن ---------- */
 .grad-text {
-  background: linear-gradient(100deg, #a78bfa 0%, #67e8f9 55%, #a78bfa 100%);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 55%, var(--accent) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text; background-clip: text;
   color: transparent;
@@ -82,82 +139,139 @@ body {
 }
 @keyframes shimmer { to { background-position: 200% center; } }
 
-/* ---------- دکمه‌ها ---------- */
+/* ==================================================
+   ۳) دکمه‌ها
+   ================================================== */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
-  border-radius: .85rem; padding: .6rem 1.1rem; font-weight: 600; font-size: .9rem;
-  border: 1px solid transparent; cursor: pointer; transition: all .2s ease;
+  border-radius: var(--radius-md); padding: .6rem 1.1rem; font-weight: 600; font-size: .9rem;
+  border: 1px solid transparent; cursor: pointer; transition: var(--transition);
   user-select: none; white-space: nowrap;
 }
-.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
 .btn-primary {
-  background: linear-gradient(135deg, #7c3aed, #6366f1 55%, #0ea5e9);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
   color: #fff;
-  box-shadow: 0 10px 30px -10px rgba(124, 58, 237, .6);
+  box-shadow: 0 4px 20px rgba(167, 139, 250, .40);
 }
-.btn-primary:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(167, 139, 250, .55);
+  filter: brightness(1.05);
+}
 .btn-ghost {
-  background: rgba(255, 255, 255, .05);
-  border-color: rgba(255, 255, 255, .13);
-  color: #cbd5e1;
+  background: var(--glass-bg);
+  border-color: var(--glass-border);
+  color: var(--text-2);
 }
-.btn-ghost:hover:not(:disabled) { background: rgba(255, 255, 255, .1); border-color: rgba(167,139,250,.4); }
-.btn-danger { background: rgba(244, 63, 94, .14); border-color: rgba(244, 63, 94, .4); color: #fda4af; }
-.btn-danger:hover:not(:disabled) { background: rgba(244, 63, 94, .24); }
-.btn-sm { padding: .35rem .75rem; font-size: .8rem; border-radius: .65rem; }
+.btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); background: var(--glass-strong); }
+.btn-danger { background: linear-gradient(135deg, var(--danger), #dc2626); color: #fff; }
+.btn-danger:hover:not(:disabled) { filter: brightness(1.08); }
+.btn-sm { padding: .35rem .75rem; font-size: .8rem; border-radius: var(--radius-sm); }
 
-/* ---------- فرم ---------- */
+/* دکمهٔ تغییر تم (شب/روز) */
+.theme-toggle {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 10px;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  color: var(--text-2); cursor: pointer;
+  transition: var(--transition);
+}
+.theme-toggle:hover { border-color: var(--accent); color: var(--accent); transform: rotate(12deg); }
+
+/* ==================================================
+   ۴) فرم
+   ================================================== */
 .input, .select, .textarea {
-  width: 100%; background: rgba(255, 255, 255, .05);
-  border: 1px solid rgba(255, 255, 255, .13);
-  border-radius: .85rem; padding: .6rem .9rem; color: #e2e8f0;
-  font-family: inherit; font-size: .9rem; outline: none; transition: border-color .2s, box-shadow .2s;
+  width: 100%; background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md); padding: .6rem .9rem; color: var(--text-1);
+  font-family: inherit; font-size: .9rem; outline: none; transition: var(--transition);
 }
 .input:focus, .select:focus, .textarea:focus {
-  border-color: rgba(167, 139, 250, .65);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, .18);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, .15);
 }
-.input::placeholder, .textarea::placeholder { color: #64748b; }
-.select option { background: #0d1121; color: #e2e8f0; }
-label.lbl { display: block; font-size: .8rem; color: #94a3b8; margin-bottom: .35rem; font-weight: 500; }
+.input::placeholder, .textarea::placeholder { color: var(--text-3); }
+.select option { background: var(--bg-1); color: var(--text-1); }
+label.lbl { display: block; font-size: .8rem; color: var(--text-3); margin-bottom: .35rem; font-weight: 500; }
 
-/* ---------- برچسب‌ها ---------- */
+/* ==================================================
+   ۵) نشان‌ها (badges) — هر رنگ با پاشیدگی خودش
+   ================================================== */
 .chip {
   display: inline-flex; align-items: center; gap: .3rem;
   font-size: .72rem; font-weight: 600; padding: .2rem .6rem;
   border-radius: 999px; border: 1px solid transparent; white-space: nowrap;
 }
-.chip-violet { background: rgba(139, 92, 246, .15); color: #c4b5fd; border-color: rgba(139, 92, 246, .35); }
-.chip-emerald { background: rgba(16, 185, 129, .14); color: #6ee7b7; border-color: rgba(16, 185, 129, .35); }
-.chip-amber { background: rgba(245, 158, 11, .14); color: #fcd34d; border-color: rgba(245, 158, 11, .4); }
-.chip-rose { background: rgba(244, 63, 94, .14); color: #fda4af; border-color: rgba(244, 63, 94, .4); }
-.chip-sky { background: rgba(14, 165, 233, .14); color: #7dd3fc; border-color: rgba(14, 165, 233, .4); }
+.chip-violet { background: rgba(167, 139, 250, .15); color: #c4b5fd; border-color: rgba(167, 139, 250, .35); }
+.chip-emerald { background: rgba(52, 211, 153, .14); color: #6ee7b7; border-color: rgba(52, 211, 153, .35); }
+.chip-amber { background: rgba(251, 191, 36, .14); color: #fcd34d; border-color: rgba(251, 191, 36, .4); }
+.chip-rose { background: rgba(248, 113, 113, .14); color: #fda4af; border-color: rgba(248, 113, 113, .4); }
+.chip-sky { background: rgba(56, 189, 248, .14); color: #7dd3fc; border-color: rgba(56, 189, 248, .4); }
 .chip-slate { background: rgba(148, 163, 184, .12); color: #cbd5e1; border-color: rgba(148, 163, 184, .3); }
 
-/* ---------- لایه‌های پاسخ دستیار ---------- */
+/* ==================================================
+   ۶) لایه‌های پاسخ دستیار
+   ================================================== */
 .layer { border-radius: 1rem; padding: .9rem 1rem; margin-top: .6rem; border: 1px solid; }
-.layer-official { background: rgba(16, 185, 129, .07); border-color: rgba(16, 185, 129, .28); }
-.layer-explain { background: rgba(255, 255, 255, .04); border-color: rgba(255, 255, 255, .1); }
-.layer-action { background: rgba(124, 58, 237, .09); border-color: rgba(139, 92, 246, .3); }
+.layer-official { background: rgba(52, 211, 153, .07); border-color: rgba(52, 211, 153, .28); }
+.layer-explain { background: var(--glass-bg); border-color: var(--glass-border); }
+.layer-action { background: rgba(167, 139, 250, .10); border-color: rgba(244, 114, 182, .30); }
 .layer-title { font-size: .75rem; font-weight: 700; margin-bottom: .45rem; display: flex; align-items: center; gap: .4rem; }
 
-/* ---------- نوار کناری ---------- */
+/* ==================================================
+   ۷) نوار کناری — لینک فعال = گرادیان بنفش→صورتی + درخشش
+   ================================================== */
 .side-item {
   display: flex; align-items: center; gap: .65rem;
-  padding: .6rem .85rem; border-radius: .85rem; font-size: .88rem; font-weight: 500;
-  color: #94a3b8; transition: all .2s ease; text-decoration: none; position: relative;
+  padding: .6rem .85rem; border-radius: var(--radius-md); font-size: .88rem; font-weight: 500;
+  color: var(--text-3); transition: var(--transition); text-decoration: none; position: relative;
 }
-.side-item:hover { color: #e2e8f0; background: rgba(255, 255, 255, .05); }
+.side-item:hover { color: var(--text-1); background: var(--glass-bg); }
 .side-item.active {
   color: #fff;
-  background: linear-gradient(120deg, rgba(124, 58, 237, .28), rgba(14, 165, 233, .18));
-  border: 1px solid rgba(139, 92, 246, .35);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: var(--shadow-glow);
 }
 .side-item.active::before {
   content: ""; position: absolute; right: -1px; top: 22%; bottom: 22%;
   width: 3px; border-radius: 3px;
-  background: linear-gradient(180deg, #a78bfa, #22d3ee);
+  background: linear-gradient(180deg, var(--accent-2), var(--accent));
 }
+
+/* ==================================================
+   ۸) جدول
+   ================================================== */
+.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .85rem; }
+.tbl th { text-align: right; color: var(--text-3); font-weight: 600; font-size: .78rem; padding: .6rem .8rem; border-bottom: 1px solid var(--glass-border); }
+.tbl td { padding: .65rem .8rem; border-bottom: 1px solid rgba(255, 255, 255, .05); color: var(--text-1); }
+.tbl tr:hover td { background: var(--glass-bg); }
+
+/* ---------- تقویم ---------- */
+.cal-cell {
+  min-height: 4.6rem; border-radius: var(--radius-md); padding: .4rem;
+  background: var(--glass-bg); border: 1px solid var(--glass-border);
+  font-size: .75rem; transition: border-color var(--transition);
+}
+.cal-cell:hover { border-color: rgba(167, 139, 250, .45); }
+.cal-cell.today { border-color: rgba(56, 189, 248, .55); background: rgba(56, 189, 248, .06); }
+.cal-cell.friday { background: rgba(248, 113, 113, .04); }
+
+/* ---------- سایر ---------- */
+.divider { height: 1px; background: linear-gradient(90deg, transparent, var(--glass-border), transparent); }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.skeleton { background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.11), rgba(255,255,255,.05)); background-size: 200% 100%; animation: shimmer2 1.4s infinite; border-radius: .6rem; }
+@keyframes shimmer2 { to { background-position: -200% 0; } }
+details.acc summary { cursor: pointer; list-style: none; }
+details.acc summary::-webkit-details-marker { display: none; }
+
+/* ---------- اسکرول‌بار ---------- */
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, .25); border-radius: 99px; border: 2px solid transparent; background-clip: content-box; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, .55); border: 2px solid transparent; background-clip: content-box; }
 
 /* ---------- انیمیشن‌ها ---------- */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
@@ -165,37 +279,102 @@ label.lbl { display: block; font-size: .8rem; color: #94a3b8; margin-bottom: .35
 @keyframes msgIn { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
 .msg-in { animation: msgIn .35s ease both; }
 @keyframes pulseDot { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
-.typing-dot { width: 7px; height: 7px; border-radius: 99px; background: #a78bfa; animation: pulseDot 1.1s infinite; }
+.typing-dot { width: 7px; height: 7px; border-radius: 99px; background: var(--accent); animation: pulseDot 1.1s infinite; }
 .typing-dot:nth-child(2) { animation-delay: .18s; }
 .typing-dot:nth-child(3) { animation-delay: .36s; }
 
-/* ---------- اسکرول‌بار ---------- */
-*::-webkit-scrollbar { width: 9px; height: 9px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, .22); border-radius: 99px; border: 2px solid transparent; background-clip: content-box; }
-*::-webkit-scrollbar-thumb:hover { background: rgba(167, 139, 250, .45); border: 2px solid transparent; background-clip: content-box; }
+/* ==================================================
+   ۹) حالت روز (html.light-theme)
+   ================================================== */
+html.light-theme {
+  color-scheme: light;
 
-/* ---------- جدول ---------- */
-.tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: .85rem; }
-.tbl th { text-align: right; color: #94a3b8; font-weight: 600; font-size: .78rem; padding: .6rem .8rem; border-bottom: 1px solid rgba(255,255,255,.09); }
-.tbl td { padding: .65rem .8rem; border-bottom: 1px solid rgba(255,255,255,.05); }
-.tbl tr:hover td { background: rgba(255,255,255,.03); }
+  --bg-deep: #eef2f7;
+  --bg-1: #e2e8f0;
+  --bg-2: #cbd5e1;
+  --glass-bg: rgba(15, 23, 42, .04);
+  --glass-border: rgba(15, 23, 42, .12);
+  --glass-strong: rgba(255, 255, 255, .88);
+  --text-1: #0f172a;
+  --text-2: #334155;
+  --text-3: #64748b;
+  --accent: #7c3aed;
+  --accent-2: #db2777;
+  --accent-3: #0284c7;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --info: #0284c7;
+  --shadow-glow: 0 8px 32px rgba(124, 58, 237, .15);
+  --shadow-card: 0 8px 24px rgba(15, 23, 42, .08);
 
-/* ---------- تقویم ---------- */
-.cal-cell {
-  min-height: 4.6rem; border-radius: .8rem; padding: .4rem;
-  background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06);
-  font-size: .75rem; transition: border-color .2s;
+  /* چرخش پالت Tailwind برای خوانایی متن روی زمینهٔ روشن */
+  --color-slate-100: #0f172a;
+  --color-slate-200: #1e293b;
+  --color-slate-300: #334155;
+  --color-slate-400: #475569;
+  --color-slate-500: #64748b;
+  --color-slate-600: #64748b;
+  --color-slate-700: #334155;
+  --color-violet-200: #5b21b6;
+  --color-violet-300: #6d28d9;
+  --color-cyan-200: #0e7490;
+  --color-cyan-300: #0369a1;
+  --color-cyan-400: #0284c7;
+  --color-emerald-300: #047857;
+  --color-amber-100: #78350f;
+  --color-amber-200: #92400e;
+  --color-amber-300: #b45309;
+  --color-rose-300: #be123c;
+  --color-sky-300: #0369a1;
 }
-.cal-cell:hover { border-color: rgba(167,139,250,.4); }
-.cal-cell.today { border-color: rgba(34,211,238,.55); background: rgba(34,211,238,.06); }
-.cal-cell.friday { background: rgba(244,63,94,.04); }
+html.light-theme body {
+  background: var(--bg-deep);
+  background-image: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+  background-attachment: fixed;
+  color: var(--text-1);
+}
+html.light-theme ::selection { background: rgba(124, 58, 237, .18); color: #0f172a; }
+html.light-theme .aurora {
+  background:
+    radial-gradient(64rem 36rem at 88% -12%, rgba(124, 58, 237, .10), transparent 62%),
+    radial-gradient(52rem 32rem at 2% 18%, rgba(219, 39, 119, .07), transparent 58%),
+    radial-gradient(48rem 30rem at 72% 112%, rgba(2, 132, 199, .07), transparent 60%),
+    #eef2f7;
+}
+html.light-theme .aurora::before { background: radial-gradient(circle, rgba(124, 58, 237, .12), transparent 70%); }
+html.light-theme .aurora::after { background: radial-gradient(circle, rgba(219, 39, 119, .10), transparent 70%); }
+html.light-theme .glass-strong { background: var(--glass-strong); border-color: rgba(15, 23, 42, .10); }
+html.light-theme .card-hover:hover { border-color: rgba(124, 58, 237, .45); box-shadow: var(--shadow-glow); }
+html.light-theme .btn-ghost:hover:not(:disabled) { background: rgba(15, 23, 42, .05); }
+html.light-theme .tbl td { border-bottom-color: rgba(15, 23, 42, .08); }
+html.light-theme .tbl tr:hover td { background: rgba(15, 23, 42, .04); }
+html.light-theme .layer-explain { background: rgba(15, 23, 42, .03); border-color: rgba(15, 23, 42, .10); }
+html.light-theme .layer-official { background: rgba(5, 150, 105, .06); border-color: rgba(5, 150, 105, .25); }
+html.light-theme .layer-action { background: rgba(124, 58, 237, .06); border-color: rgba(124, 58, 237, .25); }
+html.light-theme .cal-cell { background: rgba(15, 23, 42, .03); }
+html.light-theme .cal-cell.today { border-color: rgba(2, 132, 199, .55); background: rgba(2, 132, 199, .06); }
+html.light-theme .cal-cell.friday { background: rgba(220, 38, 38, .04); }
+html.light-theme .divider { background: linear-gradient(90deg, transparent, rgba(15, 23, 42, .14), transparent); }
+html.light-theme .skeleton { background: linear-gradient(90deg, rgba(15, 23, 42, .04), rgba(15, 23, 42, .09), rgba(15, 23, 42, .04)); background-size: 200% 100%; }
+html.light-theme *::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, .25); border: 2px solid transparent; background-clip: content-box; }
+html.light-theme *::-webkit-scrollbar-thumb:hover { background: rgba(124, 58, 237, .5); border: 2px solid transparent; background-clip: content-box; }
 
-/* ---------- سایر ---------- */
-.divider { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent); }
-.spin { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.skeleton { background: linear-gradient(90deg, rgba(255,255,255,.05), rgba(255,255,255,.11), rgba(255,255,255,.05)); background-size: 200% 100%; animation: shimmer2 1.4s infinite; border-radius: .6rem; }
-@keyframes shimmer2 { to { background-position: -200% 0; } }
-details.acc summary { cursor: pointer; list-style: none; }
-details.acc summary::-webkit-details-marker { display: none; }
+/* نشان‌ها در حالت روز: متن تیره‌تر برای خوانایی */
+html.light-theme .chip-violet { background: rgba(124, 58, 237, .08); color: #6d28d9; border-color: rgba(124, 58, 237, .30); }
+html.light-theme .chip-emerald { background: rgba(5, 150, 105, .08); color: #047857; border-color: rgba(5, 150, 105, .30); }
+html.light-theme .chip-amber { background: rgba(217, 119, 6, .08); color: #92400e; border-color: rgba(217, 119, 6, .32); }
+html.light-theme .chip-rose { background: rgba(220, 38, 38, .07); color: #be123c; border-color: rgba(220, 38, 38, .30); }
+html.light-theme .chip-sky { background: rgba(2, 132, 199, .08); color: #0369a1; border-color: rgba(2, 132, 199, .32); }
+html.light-theme .chip-slate { background: rgba(15, 23, 42, .06); color: #475569; border-color: rgba(15, 23, 42, .18); }
+
+/* پوشش کلاس‌های شفاف سفید در حالت روز */
+html.light-theme .border-white\/10,
+html.light-theme .border-white\/\[\.07\],
+html.light-theme .border-white\/\[\.08\] { border-color: rgba(15, 23, 42, .12) !important; }
+html.light-theme .bg-white\/\[\.07\],
+html.light-theme .bg-white\/5,
+html.light-theme .bg-white\/10 { background-color: rgba(15, 23, 42, .05) !important; }
+html.light-theme .hover\:bg-white\/\[\.05\]:hover,
+html.light-theme .hover\:bg-white\/\[\.08\]:hover,
+html.light-theme .hover\:bg-white\/10:hover { background-color: rgba(15, 23, 42, .07) !important; }

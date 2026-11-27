@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="آموزش‌یار۳۶۰ — پاسخ مستند از آیین‌نامه، دستورالعمل و بخشنامه با استناد، موتور قواعد قطعی، تقویم و درخواست از کارشناس" />
     <title>آموزش‌یار۳۶۰ | دستیار آموزش و آیین‌نامه</title>
+    <script>
+      // جلوگیری از پرش رنگ: تم ذخیره‌شده (شب/روز) قبل از رندر اعمال می‌شود
+      (function () { try {
+        if (localStorage.getItem('theme') === 'light') document.documentElement.classList.add('light-theme');
+      } catch (e) {} })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

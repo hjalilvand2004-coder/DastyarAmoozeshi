@@ -9,11 +9,12 @@ const GATEWAY = (() => { try { return new URLSearchParams(window.location.search
 const ORIGIN = window.location.origin
 
 const WIDGET_SNIPPET = (key, base) =>
-  `<script src="${base}/api/v1/integration/widget.js"\n        data-key="${key}"\n        data-url="${base}"\n        data-title="دستیار آیین‌نامه‌ای"\n        data-position="left"></script>`
+  `<script src="${base}/api/v1/integration/widget.js"\n        data-key="${key}"\n        data-url="${base}"\n        data-title="آموزش‌یار۳۶۰"\n        data-position="left"></script>`
 
 export default function Integrations() {
   const [systems, setSystems] = useState(null)
   const [scopes, setScopes] = useState([])
+  const [msu, setMsu] = useState(null)
   const [err, setErr] = useState('')
   const [addOpen, setAddOpen] = useState(false)
   const [newKey, setNewKey] = useState(null)
@@ -24,6 +25,7 @@ export default function Integrations() {
   useEffect(() => {
     load()
     api.get('/integrations/scopes').then(({ data }) => setScopes(data.scopes)).catch(() => {})
+    api.get('/integrations/msu/config').then(({ data }) => setMsu(data)).catch(() => {})
   }, [])
 
   const toggle = async (s) => {
@@ -57,6 +59,8 @@ export default function Integrations() {
         </div>
       </div>
 
+      {msu && <MsuCard msu={msu} />}
+
       {err && <div className="text-sm text-rose-300 mb-3">{err}</div>}
       {!systems ? <Spinner /> : systems.length === 0 ? (
         <EmptyState icon={Blocks} title="هنوز سامانه‌ای متصل نشده" sub="با دکمه بالا اولین سامانه متصل را بسازید." />
@@ -71,6 +75,48 @@ export default function Integrations() {
       {newKey && <KeyModal item={newKey} onClose={() => setNewKey(null)} />}
       {logsFor && <LogsModal system={logsFor} onClose={() => setLogsFor(null)} />}
       {snippetFor && <SnippetModal system={snippetFor} onClose={() => setSnippetFor(null)} />}
+    </div>
+  )
+}
+
+const MSU_SNIPPET = (url) =>
+  `<script src="${url}/widget.js"\n        data-agent-url="${url}"\n        data-origin="amoozeshyar360"\n        data-position="bl"\n        data-accent="#7c3aed" data-accent2="#a78bfa"></script>`
+
+function MsuCard({ msu }) {
+  const [copied, setCopied] = useState(false)
+  const copy = async () => {
+    try { await navigator.clipboard.writeText(MSU_SNIPPET(msu.url)); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch { /* ignore */ }
+  }
+  return (
+    <div className="glass p-5 mb-5 fade-up">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-400 to-fuchsia-500 flex items-center justify-center text-lg shadow-lg shadow-violet-500/30">🧭</div>
+          <div>
+            <div className="font-bold text-slate-100">دانشیار «دانشگاه هوشمند من» — ویجت پایین‌چپ صفحه</div>
+            <div className="text-xs text-slate-500 mt-0.5">هستهٔ دستیار هوشمند دانشجو؛ از همهٔ سامانه‌های دانشجویی تغذیه می‌شود و متناسب با آخرین وضعیت دانشجو راهنمایی می‌کند.</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Chip tone={msu.enabled ? 'chip-emerald' : 'chip-rose'}>{msu.enabled ? 'فعال در این سامانه' : 'غیرفعال'}</Chip>
+          <a className="btn btn-ghost btn-sm" href={msu.system_url} target="_blank" rel="noreferrer">ورود به داشیار ↗</a>
+        </div>
+      </div>
+      <div className="grid md:grid-cols-2 gap-4 text-[13px] leading-6">
+        <div className="text-slate-400 space-y-1.5">
+          <div><b className="text-slate-200">جایگاه:</b> گوشهٔ <b className="text-violet-300">پایین‌چپ</b> (data-position="bl") در همهٔ صفحه‌های آموزش‌یار۳۶۰ برای کاربران واردشده.</div>
+          <div><b className="text-slate-200">ارتباط:</b> پیام‌ها مستقیم به هستهٔ داشیار (<code className="text-cyan-300" dir="ltr">{msu.url}/api/chat</code>) با <code className="text-cyan-300">origin=amoozeshyar360</code> ارسال می‌شود.</div>
+          <div><b className="text-slate-200">وضعیت دانشجو:</b> با هر پیام، میدان <code className="text-cyan-300">context</code> (کاربر، مقطع/رشته/سال ورود، معدل و واحد-passed، صفحهٔ جاری) به هسته می‌رود تا راهنمایی «متناسب با آخرین وضعیت» باشد.</div>
+          <div className="text-slate-500 text-[12px]">فعال/غیرفعال‌سازی و تغییر آدرس هسته: «مدیریت سیستم ← تنظیمات» (کلیدهای msu_agent_*)</div>
+        </div>
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-slate-500">نصب همین داشیار در هر سامانهٔ دیگر (یک خط):</span>
+            <button className="btn btn-ghost btn-sm" onClick={copy}><Copy size={12} /> {copied ? 'کپی شد ✓' : 'کپی'}</button>
+          </div>
+          <pre className="text-[11px] leading-5 bg-black/30 border border-white/10 rounded-xl p-3 overflow-x-auto text-cyan-200" dir="ltr">{MSU_SNIPPET(msu.url)}</pre>
+        </div>
+      </div>
     </div>
   )
 }

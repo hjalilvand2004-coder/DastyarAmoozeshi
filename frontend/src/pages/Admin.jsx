@@ -162,6 +162,9 @@ function SettingsTab() {
     sso_oidc_scope: 'اسکوپ‌های SSO (پیش‌فرض: openid profile)',
     sso_app_key: 'کلید سامانه در پرتال SSO (مبنای نگاشت نقش‌ها مثل amoozeshyar.admin)',
     sso_hub_secret: 'رمز مشترک توکن HS256 پرتال (اختیاری، مخفی)',
+    msu_agent_url: 'آدرس هسته داشیار «دانشگاه هوشمند من» (مثل http://188.212.96.235:8096)',
+    msu_agent_origin: 'شناسه این سامانه برای هسته داشیار (مثل amoozeshyar360)',
+    msu_agent_enabled: 'نمایش ویجت داشیار در پایین‌چپ صفحه (1 = فعال، 0 = غیرفعال)',
   }
   const SECRET = ['llm_api_key', 'sso_oidc_client_secret', 'sso_hub_secret']
   const entryUrl = (st.public_base_url || '').replace(/\/+$/, '') + '/api/v1/auth/sso/university/entry'
